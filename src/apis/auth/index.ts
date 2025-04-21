@@ -3,19 +3,19 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://coltable-be.onrender.com/api/v1",
+    baseUrl: import.meta.env.VITE_API_BASE_URL,
   }),
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials: any) => ({
-        url: "/auth/login",
+        url: "/auth/user/login",
         method: "POST",
         body: credentials,
       }),
     }),
     signup: builder.mutation({
       query: (credentials: any) => ({
-        url: "/auth/register",
+        url: "/auth/user/register",
         method: "POST",
         body: credentials,
       }),
