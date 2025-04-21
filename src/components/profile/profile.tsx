@@ -1,9 +1,13 @@
 import { Controller, useForm } from "react-hook-form";
 import Select from 'react-select';
+import { useGetPerformerProfileQuery } from "../../apis/profile";
 
 const Profile = () => {
   const { register, handleSubmit, control } = useForm();
+  const { data: performerProfile, isLoading: isLoadingPerformerProfile } = useGetPerformerProfileQuery();
 
+  console.log("performerProfile : ", performerProfile);
+  
   const onSubmit = (data: any) => console.log(data);
 
   // Common input class with responsive width
