@@ -1,7 +1,7 @@
 import { Controller, useForm } from "react-hook-form";
 import Select from "react-select";
 import {
-  useGetVenueProfileQuery,
+  useGetSingleVenueByIdQuery,
   useUpdateVenueProfileMutation,
 } from "../../apis/venues";
 import { useEffect, useState } from "react";
@@ -17,7 +17,7 @@ const Profile = () => {
 
   const [updateProfile, { isLoading: isUpdating }] =
     useUpdateVenueProfileMutation();
-  const { data: profileData, isLoading } = useGetVenueProfileQuery(venueId);
+  const { data: profileData, isLoading } = useGetSingleVenueByIdQuery(venueId);
 
   const handleLogoUpload = async () => {
     if (!isEditing) return;

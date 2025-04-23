@@ -11,12 +11,12 @@ export const venuesApi = createApi({
     },
   }),
   endpoints: (builder) => ({
-    getVenueProfile: builder.query({
-      query: () => `/auth/user/get-profile`,
+    getSingleVenueById: builder.query({
+      query: (id) => `/api/user/venue/get-single-venue/${id}`,
     }),
     updateVenueProfile: builder.mutation({
       query: ({ data }: { data: any }) => ({
-        url: `auth/user/update-profile`,
+        url: `/api/user/venue`,
         method: "PATCH",
         body: data,
       }),
@@ -24,5 +24,5 @@ export const venuesApi = createApi({
   }),
 });
 
-export const { useGetVenueProfileQuery, useUpdateVenueProfileMutation } =
+export const { useGetSingleVenueByIdQuery, useUpdateVenueProfileMutation } =
   venuesApi;
