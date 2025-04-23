@@ -12,11 +12,11 @@ export const venuesApi = createApi({
   }),
   endpoints: (builder) => ({
     getSingleVenueById: builder.query({
-      query: (id) => `/api/user/venue/get-single-venue/${id}`,
+      query: (id) => `/auth/user/get-profile/${id}`,
     }),
     updateVenueProfile: builder.mutation({
       query: ({ data }: { data: any }) => ({
-        url: `/api/user/venue`,
+        url: `auth/user/update-profile`,
         method: "PATCH",
         body: data,
       }),

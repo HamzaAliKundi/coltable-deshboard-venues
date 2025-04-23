@@ -14,6 +14,7 @@ const Profile = () => {
   const [logoPreview, setLogoPreview] = useState("");
   const { register, handleSubmit, control, reset } = useForm();
   const venueId = localStorage.getItem("userId") || "";
+  const [logoUploading, setLogoUploading] = useState(false);
 
   const [updateProfile, { isLoading: isUpdating }] =
     useUpdateVenueProfileMutation();
@@ -30,6 +31,7 @@ const Profile = () => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         try {
+          setLogoUploading(true);
           // First show preview
           const reader = new FileReader();
           reader.onload = () => {
@@ -76,6 +78,8 @@ const Profile = () => {
         } catch (error) {
           console.error("Failed to upload logo:", error);
           toast.error("Failed to upload logo. Please try again.");
+        } finally {
+          setLogoUploading(false); // Upload complete
         }
       }
     };
@@ -103,7 +107,7 @@ const Profile = () => {
         openingTime: profileData.user.openingHours?.split(" - ")[0],
         closingTime: profileData.user.openingHours?.split(" - ")[1],
         venueType: profileData.user.venueType,
-        facilities: profileData.user.facilities?.map((f) => ({
+        facilities: profileData.user.facilities?.map((f: any) => ({
           value: f,
           label: f.charAt(0).toUpperCase() + f.slice(1).replace("-", " "),
         })),
@@ -123,7 +127,7 @@ const Profile = () => {
   }, [profileData, reset]);
 
   const onSubmit = async (data: any) => {
-    console.log("first", data)
+    console.log("first", data);
     try {
       const transformedData = {
         name: data.venueName,
@@ -414,11 +418,14 @@ const Profile = () => {
             <div className="flex flex-row gap-3 justify-center mt-6 md:mt-8">
               <button
                 type="submit"
-                disabled={isUpdating}
-                className="w-[150px] sm:w-[200px] px-4 sm:px-6 md:px-8 py-2 rounded-full bg-[#FF00A2] text-white text-sm md:text-base"
+                disabled={!isEditing || isUpdating || logoUploading}
+                className={`w-full py-2.5 px-6 bg-[#FF00A2] text-white rounded-xl font-semibold transition duration-200 ${
+                  (!isEditing || isUpdating || logoUploading) &&
+                  "opacity-50 cursor-not-allowed"
+                }`}
               >
                 {isUpdating ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     <span>Publishing...</span>
                   </div>
