@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-export const profileApi = createApi({
-  reducerPath: "profileApi",
+export const venuesApi = createApi({
+  reducerPath: "venuesApi",
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
     prepareHeaders: (headers) => {
@@ -11,28 +11,18 @@ export const profileApi = createApi({
     },
   }),
   endpoints: (builder) => ({
-    getPerformerProfile: builder.query({
-      query: () => `/auth/user/get-profile`,
+    getSingleVenueById: builder.query({
+      query: (id) => `/auth/user/get-profile/${id}`,
     }),
-    updatePerformerProfile: builder.mutation({
+    updateVenueProfile: builder.mutation({
       query: ({ data }: { data: any }) => ({
         url: `auth/user/update-profile`,
         method: "PATCH",
         body: data,
       }),
     }),
-    addEvent: builder.mutation({
-      query: (eventData: any) => ({
-        url: "/api/performer/event/add-event",
-        method: "POST",
-        body: eventData,
-      }),
-    }),
   }),
 });
 
-export const {
-  useGetPerformerProfileQuery,
-  useUpdatePerformerProfileMutation,
-  useAddEventMutation,
-} = profileApi;
+export const { useGetSingleVenueByIdQuery, useUpdateVenueProfileMutation } =
+  venuesApi;
