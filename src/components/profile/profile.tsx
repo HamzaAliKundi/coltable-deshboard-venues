@@ -102,10 +102,10 @@ const Profile = () => {
       const formData = {
         venueName: profileData.user.name,
         aboutVenue: profileData.user.description,
-        topPerformers: profileData.user.topPerformers?.join(", "),
-        location: profileData.user.address,
-        openingTime: profileData.user.openingHours?.split(" - ")[0],
-        closingTime: profileData.user.openingHours?.split(" - ")[1],
+        topPerformers: profileData.user.topDragPerformers,
+        location: profileData.user.location,
+        openingTime: profileData.user.hoursOfOperation?.split(" - ")[0],
+        closingTime: profileData.user.hoursOfOperation?.split(" - ")[1],
         venueType: profileData.user.venueType,
         facilities: profileData.user.facilities?.map((f: any) => ({
           value: f,
@@ -128,15 +128,15 @@ const Profile = () => {
 
   const onSubmit = async (data: any) => {
     console.log("first", data);
+
     try {
       const transformedData = {
         name: data.venueName,
         description: data.aboutVenue,
-        topPerformers: data.topPerformers
-          ?.split(",")
-          .map((p: string) => p.trim()),
-        address: data.location,
-        openingHours: `${data.openingTime} - ${data.closingTime}`,
+        topDragPerformers: data.topPerformers,
+
+        location: data.location,
+        hoursOfOperation: `${data.openingTime} - ${data.closingTime}`,
         venueType: data.venueType,
         facilities: data.facilities
           ? data.facilities.map((item: any) => item.value)
@@ -256,12 +256,18 @@ const Profile = () => {
           {/* Type of Venue */}
           <div>
             <label className={labelClass}>Type of Venue*</label>
-            <input
-              type="text"
-              placeholder="Bar /Club"
-              className={inputClass}
-              disabled={!isEditing}
-              {...register("venueType", { required: true })}
+            <Controller
+              name="venueType"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <select {...field} disabled={!isEditing} className={inputClass}>
+                  <option value="">Select venue type</option>
+                  <option value="Bar/Club">Bar/Club</option>
+                  <option value="Restaurants/Dining">Restaurants/Dining</option>
+                  <option value="Other">Other</option>
+                </select>
+              )}
             />
           </div>
 
@@ -361,7 +367,7 @@ const Profile = () => {
           {/* Social Media Links */}
           <div className="space-y-3 md:space-y-4">
             <h2 className={labelClass}>Add Social Media Link</h2>
-            {["Instagram", "Facebook", "TikTok", "Twitter", "YouTube"].map(
+            {["Instagram", "Facebook", "TikTok", "YouTube"].map(
               (platform) => (
                 <input
                   key={platform}
