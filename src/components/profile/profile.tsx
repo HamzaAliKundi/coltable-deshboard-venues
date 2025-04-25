@@ -13,7 +13,7 @@ const Profile = () => {
   const [logoUrl, setLogoUrl] = useState("");
   const [logoPreview, setLogoPreview] = useState("");
   const { register, handleSubmit, control, reset } = useForm();
-  const venueId = localStorage.getItem("userId") || "";
+  const venueId = JSON.parse(localStorage.getItem("venueId") || '""');
   const [logoUploading, setLogoUploading] = useState(false);
 
   const [updateProfile, { isLoading: isUpdating }] =
@@ -99,13 +99,16 @@ const Profile = () => {
 
   useEffect(() => {
     if (profileData?.user) {
+      const [openingTime = "18:00", closingTime = "03:00"] =
+        profileData.user.hoursOfOperation?.split(" - ") || [];
+
       const formData = {
         venueName: profileData.user.name,
         aboutVenue: profileData.user.description,
         topPerformers: profileData.user.topDragPerformers,
         location: profileData.user.location,
-        openingTime: profileData.user.hoursOfOperation?.split(" - ")[0],
-        closingTime: profileData.user.hoursOfOperation?.split(" - ")[1],
+        openingTime: openingTime || "18:00", // 06:00 PM
+        closingTime: closingTime || "03:00", // 03:00 AM
         venueType: profileData.user.venueType,
         facilities: profileData.user.facilities?.map((f: any) => ({
           value: f,
@@ -367,18 +370,16 @@ const Profile = () => {
           {/* Social Media Links */}
           <div className="space-y-3 md:space-y-4">
             <h2 className={labelClass}>Add Social Media Link</h2>
-            {["Instagram", "Facebook", "TikTok", "YouTube"].map(
-              (platform) => (
-                <input
-                  key={platform}
-                  type="text"
-                  placeholder={platform.toLowerCase()}
-                  className={inputClass}
-                  disabled={!isEditing}
-                  {...register(platform.toLowerCase())}
-                />
-              )
-            )}
+            {["Instagram", "Facebook", "TikTok", "YouTube"].map((platform) => (
+              <input
+                key={platform}
+                type="text"
+                placeholder={platform.toLowerCase()}
+                className={inputClass}
+                disabled={!isEditing}
+                {...register(platform.toLowerCase())}
+              />
+            ))}
           </div>
 
           {/* Upload Logo */}
