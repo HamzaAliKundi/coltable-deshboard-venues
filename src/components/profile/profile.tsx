@@ -13,7 +13,7 @@ const Profile = () => {
   const [logoUrl, setLogoUrl] = useState("");
   const [logoPreview, setLogoPreview] = useState("");
   const { register, handleSubmit, control, reset } = useForm();
-  const venueId = localStorage.getItem("userId") || "";
+  const venueId = JSON.parse(localStorage.getItem("venueId") || '""');
   const [logoUploading, setLogoUploading] = useState(false);
 
   const [updateProfile, { isLoading: isUpdating }] =
@@ -99,13 +99,16 @@ const Profile = () => {
 
   useEffect(() => {
     if (profileData?.user) {
+      const [openingTime = "18:00", closingTime = "03:00"] =
+        profileData.user.hoursOfOperation?.split(" - ") || [];
+
       const formData = {
         venueName: profileData.user.name,
         aboutVenue: profileData.user.description,
-        topPerformers: profileData.user.topPerformers?.join(", "),
-        location: profileData.user.address,
-        openingTime: profileData.user.openingHours?.split(" - ")[0],
-        closingTime: profileData.user.openingHours?.split(" - ")[1],
+        topPerformers: profileData.user.topDragPerformers,
+        location: profileData.user.location,
+        openingTime: openingTime || "18:00", // 06:00 PM
+        closingTime: closingTime || "03:00", // 03:00 AM
         venueType: profileData.user.venueType,
         facilities: profileData.user.facilities?.map((f: any) => ({
           value: f,
@@ -128,15 +131,15 @@ const Profile = () => {
 
   const onSubmit = async (data: any) => {
     console.log("first", data);
+
     try {
       const transformedData = {
         name: data.venueName,
         description: data.aboutVenue,
-        topPerformers: data.topPerformers
-          ?.split(",")
-          .map((p: string) => p.trim()),
-        address: data.location,
-        openingHours: `${data.openingTime} - ${data.closingTime}`,
+        topDragPerformers: data.topPerformers,
+
+        location: data.location,
+        hoursOfOperation: `${data.openingTime} - ${data.closingTime}`,
         venueType: data.venueType,
         facilities: data.facilities
           ? data.facilities.map((item: any) => item.value)
@@ -256,12 +259,18 @@ const Profile = () => {
           {/* Type of Venue */}
           <div>
             <label className={labelClass}>Type of Venue*</label>
-            <input
-              type="text"
-              placeholder="Bar /Club"
-              className={inputClass}
-              disabled={!isEditing}
-              {...register("venueType", { required: true })}
+            <Controller
+              name="venueType"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <select {...field} disabled={!isEditing} className={inputClass}>
+                  <option value="">Select venue type</option>
+                  <option value="Bar/Club">Bar/Club</option>
+                  <option value="Restaurants/Dining">Restaurants/Dining</option>
+                  <option value="Other">Other</option>
+                </select>
+              )}
             />
           </div>
 
@@ -361,18 +370,16 @@ const Profile = () => {
           {/* Social Media Links */}
           <div className="space-y-3 md:space-y-4">
             <h2 className={labelClass}>Add Social Media Link</h2>
-            {["Instagram", "Facebook", "TikTok", "Twitter", "YouTube"].map(
-              (platform) => (
-                <input
-                  key={platform}
-                  type="text"
-                  placeholder={platform.toLowerCase()}
-                  className={inputClass}
-                  disabled={!isEditing}
-                  {...register(platform.toLowerCase())}
-                />
-              )
-            )}
+            {["Instagram", "Facebook", "TikTok", "YouTube"].map((platform) => (
+              <input
+                key={platform}
+                type="text"
+                placeholder={platform.toLowerCase()}
+                className={inputClass}
+                disabled={!isEditing}
+                {...register(platform.toLowerCase())}
+              />
+            ))}
           </div>
 
           {/* Upload Logo */}
