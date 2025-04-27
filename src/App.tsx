@@ -31,6 +31,7 @@ function App() {
             <Route path="review" element={<ReviewsPage />} />
             <Route path="events" element={<EventsPage />} />
             <Route path="event/create-event" element={<CreateEvent />} />
+            <Route path="event/create-event/:id" element={<CreateEvent />} />
             <Route path="privacy" element={<Privacy />} />
             <Route path="terms" element={<Terms />} />
           </Route>
