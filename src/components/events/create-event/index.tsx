@@ -1,225 +1,688 @@
-import React from 'react'
+import { Calendar, ChevronDown } from "lucide-react";
+import { useForm } from "react-hook-form";
+import {
+  useAddEventByVenueMutation,
+  useGetEventsByVenuesByIdQuery,
+  useUpdateEventByVenueMutation,
+} from "../../../apis/events";
+import toast from "react-hot-toast";
+import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
+type FormData = {
+  eventName: string;
+  eventHost: string;
+  eventType: string;
+  soundEquipment?: string;
+  outdoorCoverings?: string;
+  eventCategory?: string;
+  eventTheme?: string;
+  audienceType: string;
+  equipmentResponsibility: string;
+  startTime: string;
+  endTime: string;
+  hostsCount: string;
+  performersCount: string;
+  callTime: string;
+  performerNumbers: string;
+  dressingArea: string;
+  musicDeadline: string;
+  specialRequests?: string;
+};
 
 const CreateEvent = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [addEventByVenue, { isLoading: createEventLoading }] =
+    useAddEventByVenueMutation();
+  const [updateEventByVenue, { isLoading: updateEventLoading }] =
+    useUpdateEventByVenueMutation();
+  const { data: getEventsByVenuesById, isLoading: getEventLoading } =
+    useGetEventsByVenuesByIdQuery(id, {
+      skip: !id,
+    });
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormData>();
+
+  useEffect(() => {
+    if (id && getEventsByVenuesById?.event) {
+      reset({
+        eventName: getEventsByVenuesById.event.title || "",
+        eventHost: getEventsByVenuesById.event.host || "",
+        eventType: getEventsByVenuesById.event.type || "",
+        eventTheme: getEventsByVenuesById.event.theme || "",
+        audienceType: getEventsByVenuesById.event.audienceType,
+        startTime: getEventsByVenuesById.event.startTime
+          ? new Date(getEventsByVenuesById.event.startTime)
+              .toISOString()
+              .slice(0, 16)
+          : undefined,
+        endTime: getEventsByVenuesById.event.endTime
+          ? new Date(getEventsByVenuesById.event.endTime)
+              .toISOString()
+              .slice(0, 16)
+          : undefined,
+        musicDeadline: getEventsByVenuesById.event.musicFormat || undefined,
+        equipmentResponsibility:
+          getEventsByVenuesById.event.isEquipmentProvidedByPerformer || "",
+        hostsCount: getEventsByVenuesById.event.hosts || "",
+        performersCount: getEventsByVenuesById.event.performers || "",
+        callTime: getEventsByVenuesById.event.eventCallTime || "",
+        dressingArea: getEventsByVenuesById.event.hasPrivateDressingArea || "",
+        specialRequests: getEventsByVenuesById.event.specialRequirements || "",
+        outdoorCoverings: getEventsByVenuesById.event.hasCoverings || "",
+        soundEquipment:
+          getEventsByVenuesById.event.isEquipmentProvidedByVenue || "",
+        performerNumbers: getEventsByVenuesById.event.assignedPerformers || "",
+
+        eventCategory: getEventsByVenuesById.event.eventCategory || "",
+      });
+    }
+  }, [id, getEventsByVenuesById, reset]);
+
+  const onSubmit = async (data: FormData) => {
+    const transformedData = {
+      title: data.eventName,
+      host: data.eventHost,
+      type: data.eventType,
+      theme: data.eventTheme,
+      startTime: new Date(data.startTime).toISOString(),
+      endTime: new Date(data.endTime).toISOString(),
+      specialRequirements: data.specialRequests,
+      audienceType: data.audienceType,
+      hosts: data.hostsCount,
+      eventCallTime: data.callTime,
+      hasCoverings: data.outdoorCoverings,
+      hasPrivateDressingArea: data.dressingArea,
+      isEquipmentProvidedByVenue: data.soundEquipment,
+      isEquipmentProvidedByPerformer: data.equipmentResponsibility,
+      performers: data.performersCount,
+      musicFormat: data.musicDeadline,
+      assignedPerformers: data.performerNumbers,
+      // eventCategory: data.eventCategory,
+    };
+
+    try {
+      if (id) {
+        await updateEventByVenue({
+          id,
+          eventData: transformedData,
+        }).unwrap();
+        toast.success("Event updated successfully!");
+      } else {
+        await addEventByVenue(transformedData).unwrap();
+        toast.success("Event created successfully!");
+      }
+      navigate("/events");
+    } catch (error) {
+      console.error("Error saving event:", error);
+      toast.error(
+        `Failed to ${id ? "update" : "create"} event. Please try again.`
+      );
+    }
+  };
+
+  const isSubmitting = createEventLoading || updateEventLoading;
+
+  if (getEventLoading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="w-8 h-8 border-2 border-[#FF00A2] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 md:px-8 py-16 bg-black">
       <div className="w-[100px] my-3 h-[4px] rounded-lg bg-[#FF00A2]"></div>
-      <h1 className="text-white text-3xl font-space-grotesk mb-8">Event Creation Form</h1>
-      
-      <form className="flex flex-col gap-6">
+      <h1 className="text-white text-3xl font-space-grotesk mb-8">
+        Event Creation Form
+      </h1>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         {/* Event Name and Host */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
             <label className="text-white font-space-grotesk text-sm md:text-base">
-              Event Name
+              Event Name*
             </label>
-            <input 
+            <input
               type="text"
-              placeholder="Event Name..."
+              placeholder="Event Name"
               className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+              {...register("eventName", { required: "Event name is required" })}
             />
+            {errors.eventName && (
+              <span className="text-red-500 text-sm">
+                {errors.eventName.message}
+              </span>
+            )}
           </div>
           <div className="flex flex-col gap-2">
             <label className="text-white font-space-grotesk text-sm md:text-base">
-              Event Host
+              Event Host*
             </label>
-            <input 
+            <input
               type="text"
-              placeholder="Event Host Name..."
+              placeholder="Event Host Name"
               className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+              {...register("eventHost", { required: "Event host is required" })}
             />
+            {errors.eventHost && (
+              <span className="text-red-500 text-sm">
+                {errors.eventHost.message}
+              </span>
+            )}
           </div>
         </div>
 
         {/* Event type dropdown */}
         <div className="flex flex-col gap-2">
           <label className="text-white font-space-grotesk text-sm md:text-base">
-            Event type
+            Event type*
           </label>
-          <select 
-            className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none"
-          >
-            <option value="">Drag show</option>
-          </select>
+          <div className="relative">
+            <select
+              required
+              defaultValue=""
+              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none invalid:text-gray-500"
+              {...register("eventType", { required: "Event type is required" })}
+            >
+              <option value="" disabled hidden>
+                Select
+              </option>
+              <option value="drag-show" className="text-white">
+                Drag Show
+              </option>
+              <option value="drag-brunch" className="text-white">
+                Drag Brunch
+              </option>
+              <option value="drag-bingo" className="text-white">
+                Drag Bingo
+              </option>
+              <option value="drag-trivia" className="text-white">
+                Drag Trivia
+              </option>
+              <option value="comedy-show" className="text-white">
+                Comedy Show
+              </option>
+              <option value="music-concert" className="text-white">
+                Music Concert
+              </option>
+              <option value="dance-performance" className="text-white">
+                Dance Performance
+              </option>
+              <option value="theater-show" className="text-white">
+                Theater Show
+              </option>
+              <option value="other" className="text-white">
+                Other
+              </option>
+            </select>
+            <div className="absolute right-4 top-[13px] pointer-events-none">
+              <ChevronDown color="white" size={16} />
+            </div>
+          </div>
+          {errors.eventType && (
+            <span className="text-red-500 text-sm">
+              {errors.eventType.message}
+            </span>
+          )}
         </div>
 
         {/* Sound Equipment and Outdoor Venue Questions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 self-end">
             <label className="text-white font-space-grotesk text-sm md:text-base">
-              Does the venue have sound equipment for music,microphone,DJ, etc?
+              Does the venue have sound equipment for music,microphone,DJ, etc?*
             </label>
-            <input 
+            <input
               type="text"
-              placeholder="Type ..."
+              placeholder="Enter here"
               className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+              {...register("soundEquipment", {
+                required: "Equipment information is required",
+              })}
             />
+            {errors.soundEquipment && (
+              <span className="text-red-500 text-sm">
+                {errors.soundEquipment.message}
+              </span>
+            )}
           </div>
           <div className="flex flex-col gap-2">
             <label className="text-white font-space-grotesk text-sm md:text-base">
-            If an Outdoor venue, are there awnings/coverings to account for inclement weather conditions?
+              If an Outdoor venue, are there awnings/coverings to account for
+              inclement weather conditions?*
             </label>
-            <input 
+            <input
               type="text"
-              placeholder="Type ..."
+              placeholder="Ener here"
               className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+              {...register("outdoorCoverings", {
+                required: "Outdoor information is required",
+              })}
             />
+            {errors.outdoorCoverings && (
+              <span className="text-red-500 text-sm">
+                {errors.outdoorCoverings.message}
+              </span>
+            )}
           </div>
         </div>
-
         {/* Event Type and Theme */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
             <label className="text-white font-space-grotesk text-sm md:text-base">
-              Event Type
+              Event Category*
             </label>
-            <input 
+            <input
               type="text"
-              placeholder="Event Type ..."
+              placeholder="Event Category"
               className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+              {...register("eventCategory", {
+                required: "Event category information is required",
+              })}
             />
+            {errors.eventCategory && (
+              <span className="text-red-500 text-sm">
+                {errors.eventCategory.message}
+              </span>
+            )}
           </div>
           <div className="flex flex-col gap-2">
             <label className="text-white font-space-grotesk text-sm md:text-base">
-              Event Theme
+              Event Theme*
             </label>
-            <input 
+            <input
               type="text"
-              placeholder="Event Theme..."
+              placeholder="Event Theme"
               className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+              {...register("eventTheme", {
+                required: "Event theme information is required",
+              })}
             />
+            {errors.eventTheme && (
+              <span className="text-red-500 text-sm">
+                {errors.eventTheme.message}
+              </span>
+            )}
           </div>
         </div>
 
         {/* Equipment Responsibility */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
-
-          <div className="flex flex-col gap-2">
-            <label className="text-white font-space-grotesk text-sm md:text-base h-10">
-              Audience Type
+          <div className="flex flex-col gap-2 self-end">
+            <label className="text-white font-space-grotesk text-sm md:text-base">
+              Audience Type*
             </label>
-            <select 
-              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none"
-            >
-              <option value="adults">Adults</option>
-              <option value="children">Children</option>
-              <option value="all">All Ages</option>
-            </select>
+            <div className="relative">
+              <select
+                required
+                defaultValue=""
+                className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none invalid:text-gray-500"
+                {...register("audienceType", {
+                  required: "Audience type is required",
+                })}
+              >
+                <option value="" disabled hidden>
+                  Select
+                </option>
+                <option value="adults" className="text-white">
+                  Adults
+                </option>
+                <option value="children" className="text-white">
+                  Children
+                </option>
+                <option value="all" className="text-white">
+                  All Ages
+                </option>
+              </select>
+              <div className="absolute right-4 top-[13px] pointer-events-none">
+                <ChevronDown color="white" size={16} />
+              </div>
+            </div>
+            {errors.audienceType && (
+              <span className="text-red-500 text-sm">
+                {errors.audienceType.message}
+              </span>
+            )}
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-white font-space-grotesk text-sm md:text-base h-10">
-              Is the Performer responsible for supplying any equipment (i.e. Audio/Visual, microphones, games, bingo cards/setup, etc.)?
+            <label className="text-white font-space-grotesk text-sm md:text-base ">
+              Is the Performer responsible for supplying any equipment (i.e.
+              Audio/Visual, microphones, games, bingo cards/setup, etc.)?*
             </label>
-            <select 
-              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none"
-            >
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
+            <div className="relative">
+              <select
+                required
+                defaultValue=""
+                className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none invalid:text-gray-500"
+                {...register("equipmentResponsibility", {
+                  required: "This field is required",
+                })}
+              >
+                <option value="" disabled hidden>
+                  Select
+                </option>
+                <option value="yes" className="text-white">
+                  Yes
+                </option>
+                <option value="no" className="text-white">
+                  No
+                </option>
+              </select>
+              <div className="absolute right-4 top-[13px] pointer-events-none">
+                <ChevronDown color="white" size={16} />
+              </div>
+            </div>
+            {errors.equipmentResponsibility && (
+              <span className="text-red-500 text-sm">
+                {errors.equipmentResponsibility.message}
+              </span>
+            )}
           </div>
         </div>
-
 
         {/* Event Times */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
             <label className="text-white font-space-grotesk text-sm md:text-base">
-              Event Start Time
+              Event Start Time*
             </label>
-            <input 
-              type="time"
-              defaultValue="00:00"
-              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500"
-            />
+            <div className="relative">
+              <input
+                type="datetime-local"
+                defaultValue={new Date(Date.now() + 24 * 60 * 60 * 1000)
+                  .toISOString()
+                  .slice(0, 16)}
+                className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500"
+                {...register("startTime", {
+                  required: "Start time is required",
+                })}
+              />
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <Calendar color="white" size={20} />
+              </div>
+            </div>
+
+            {errors.startTime && (
+              <span className="text-red-500 text-sm">
+                {errors.startTime.message}
+              </span>
+            )}
           </div>
           <div className="flex flex-col gap-2">
             <label className="text-white font-space-grotesk text-sm md:text-base">
-              Event End Time
+              Event End Time*
             </label>
-            <input 
-              type="time"
-              defaultValue="00:00"
-              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500"
-            />
+            <div className="relative">
+              <input
+                type="datetime-local"
+                defaultValue={new Date(Date.now() + 24 * 60 * 60 * 1000)
+                  .toISOString()
+                  .slice(0, 16)}
+                className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500"
+                {...register("endTime", { required: "End time is required" })}
+              />
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <Calendar color="white" size={20} />
+              </div>
+            </div>
+
+            {errors.endTime && (
+              <span className="text-red-500 text-sm">
+                {errors.endTime.message}
+              </span>
+            )}
           </div>
         </div>
 
-          {/* Hosts and Performers Count */}
+        {/* Hosts and Performers Count */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
             <label className="text-white font-space-grotesk text-sm md:text-base">
-              How many hosts/co-hosts?
+              How many hosts/co-hosts?*
             </label>
-            <select 
-              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none"
-            >
-              <option value="0">0</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5+</option>
-            </select>
+            <div className="relative">
+              <select
+                required
+                defaultValue=""
+                className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none invalid:text-gray-500"
+                {...register("hostsCount", {
+                  required: "Host count is required",
+                })}
+              >
+                <option value="" disabled hidden>
+                  Select
+                </option>
+                <option value="0" className="text-white">
+                  0
+                </option>
+                <option value="1" className="text-white">
+                  1
+                </option>
+                <option value="2" className="text-white">
+                  2
+                </option>
+                <option value="3" className="text-white">
+                  3
+                </option>
+                <option value="4" className="text-white">
+                  4
+                </option>
+                <option value="5" className="text-white">
+                  5
+                </option>
+              </select>
+              <div className="absolute right-4 top-[13px] pointer-events-none">
+                <ChevronDown color="white" size={16} />
+              </div>
+            </div>
+            {errors.hostsCount && (
+              <span className="text-red-500 text-sm">
+                {errors.hostsCount.message}
+              </span>
+            )}
           </div>
           <div className="flex flex-col gap-2">
             <label className="text-white font-space-grotesk text-sm md:text-base">
-              How many Performers (incl. host) will be part of the event?
+              How many Performers (incl. host) will be part of the event?*
             </label>
-            <select 
-              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none"
-            >
-              <option value="0">0</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5+</option>
-            </select>
+            <div className="relative">
+              <select
+                required
+                defaultValue=""
+                className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none invalid:text-gray-500"
+                {...register("performersCount", {
+                  required: "Performers count is required",
+                })}
+              >
+                <option value="" disabled hidden>
+                  Select
+                </option>
+                <option value="0" className="text-white">
+                  0
+                </option>
+                <option value="1" className="text-white">
+                  1
+                </option>
+                <option value="2" className="text-white">
+                  2
+                </option>
+                <option value="3" className="text-white">
+                  3
+                </option>
+                <option value="4" className="text-white">
+                  4
+                </option>
+                <option value="5" className="text-white">
+                  5
+                </option>
+              </select>
+              <div className="absolute right-4 top-[13px] pointer-events-none">
+                <ChevronDown color="white" size={16} />
+              </div>
+            </div>
+            {errors.performersCount && (
+              <span className="text-red-500 text-sm">
+                {errors.performersCount.message}
+              </span>
+            )}
           </div>
         </div>
 
         {/* Equipment Responsibility */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
-
-          <div className="flex flex-col gap-2">
-            <label className="text-white font-space-grotesk text-sm md:text-base h-10">
-            Event Call Time (the time performers/staff need to be at the venue)
+          <div className="flex flex-col gap-2 ">
+            <label className="text-white font-space-grotesk text-sm md:text-base">
+              Event Call Time*
             </label>
-            <select 
-              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none"
-            >
-              <option value="adults">Adults</option>
-              <option value="children">Children</option>
-              <option value="all">All Ages</option>
-            </select>
+            <div className="relative">
+              <select
+                required
+                defaultValue=""
+                className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none invalid:text-gray-500"
+                {...register("callTime", { required: "Call time is required" })}
+              >
+                <option value="" disabled hidden>
+                  Select
+                </option>
+                <option value="1-hour" className="text-white">
+                  1 hour before
+                </option>
+                <option value="2-hours" className="text-white">
+                  2 hours before
+                </option>
+                <option value="3-hours" className="text-white">
+                  3 hours before
+                </option>
+                <option value="other" className="text-white">
+                  Other
+                </option>
+              </select>
+              <div className="absolute right-4 top-[13px] pointer-events-none">
+                <ChevronDown color="white" size={16} />
+              </div>
+            </div>
+            {errors.callTime && (
+              <span className="text-red-500 text-sm">
+                {errors.callTime.message}
+              </span>
+            )}
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-white font-space-grotesk text-sm md:text-base h-10">
-            How Many numbers will the performer/each performer have?
+            <label className="text-white font-space-grotesk text-sm md:text-base">
+              How Many numbers will the performer/each performer have?*
             </label>
-            <select 
-              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none"
-            >
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
+            <div className="relative">
+              <select
+                required
+                defaultValue=""
+                className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none invalid:text-gray-500"
+                {...register("performerNumbers", {
+                  required: "This field is required",
+                })}
+              >
+                <option value="" disabled hidden>
+                  Select
+                </option>
+                <option value="1" className="text-white">
+                  1
+                </option>
+                <option value="2" className="text-white">
+                  2
+                </option>
+                <option value="3" className="text-white">
+                  3
+                </option>
+                <option value="4" className="text-white">
+                  4
+                </option>
+                <option value="5" className="text-white">
+                  5
+                </option>
+              </select>
+              <div className="absolute right-4 top-[13px] pointer-events-none">
+                <ChevronDown color="white" size={16} />
+              </div>
+            </div>
+            {errors.performerNumbers && (
+              <span className="text-red-500 text-sm">
+                {errors.performerNumbers.message}
+              </span>
+            )}
           </div>
         </div>
 
         {/* Dressing Area */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
-            <label className="text-white font-space-grotesk text-sm md:text-base">Is there a Private Dressing area to allow for the performers to change costumes?</label>
-            <select className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none">
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
+            <label className="text-white font-space-grotesk text-sm md:text-base">
+              Is there a Private Dressing area to allow for the performers to
+              change costumes?*
+            </label>
+            <div className="relative">
+              <select
+                required
+                defaultValue=""
+                className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500 appearance-none invalid:text-gray-500"
+                {...register("dressingArea", {
+                  required: "This field is required",
+                })}
+              >
+                <option value="" disabled hidden>
+                  Select
+                </option>
+                <option value="yes" className="text-white">
+                  Yes
+                </option>
+                <option value="no" className="text-white">
+                  No
+                </option>
+              </select>
+              <div className="absolute right-4 top-[13px] pointer-events-none">
+                <ChevronDown color="white" size={16} />
+              </div>
+            </div>
+            {errors.dressingArea && (
+              <span className="text-red-500 text-sm">
+                {errors.dressingArea.message}
+              </span>
+            )}
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-white font-space-grotesk text-sm md:text-base">What format will the performer need to provide the music/and needed by date/time?</label>
-            <input type="time" defaultValue="00:00" className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500" />
+            <label className="text-white font-space-grotesk text-sm md:text-base">
+              What format will the performer need to provide the music/and
+              needed by date/time?*
+            </label>
+            <div className="relative">
+              <input
+                type="datetime-local"
+                defaultValue={new Date(Date.now() + 24 * 60 * 60 * 1000)
+                  .toISOString()
+                  .slice(0, 16)}
+                className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500"
+                {...register("musicDeadline", {
+                  required: "Deadline is required",
+                })}
+              />
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <Calendar color="white" size={20} />
+              </div>
+            </div>
+            {errors.musicDeadline && (
+              <span className="text-red-500 text-sm">
+                {errors.musicDeadline.message}
+              </span>
+            )}
           </div>
         </div>
 
@@ -228,23 +691,34 @@ const CreateEvent = () => {
           <label className="text-white font-space-grotesk text-sm md:text-base">
             Any special Requests for the performer?
           </label>
-          <textarea 
+          <textarea
             placeholder="Type..."
             rows={6}
             className="w-full bg-[#0D0D0D] rounded-lg p-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+            {...register("specialRequests")}
           />
         </div>
 
         {/* Submit Button */}
-        <button 
+        <button
           type="submit"
-          className="mt-4 bg-[#FF00A2] text-white font-space-grotesk text-base py-2 px-12 rounded-full hover:bg-pink-600 transition-colors w-fit ml-auto"
+          className={`mt-4 bg-[#FF00A2] text-white font-space-grotesk text-base py-2 px-12 rounded-full hover:bg-pink-600 transition-colors w-fit ml-auto 
+            ${isSubmitting ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+            `}
         >
-          SUBMINT
+          {isSubmitting ? (
+            <div className="flex justify-center px-[17px]">
+              <div className="w-6 h-6 border-2 border-[#eeeaed] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : id ? (
+            "UPDATE"
+          ) : (
+            "SUBMIT"
+          )}
         </button>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default CreateEvent
+export default CreateEvent;
