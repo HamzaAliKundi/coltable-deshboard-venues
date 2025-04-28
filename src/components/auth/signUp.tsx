@@ -49,7 +49,7 @@ const Signup = () => {
       >
         <div className="w-full max-w-3xl px-4 py-8">
           <h1 className="text-center text-2xl font-bold text-white mb-8 font-['Space_Grotesk'] uppercase">
-            New User Registration
+            Venues Registration
           </h1>
 
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -133,10 +133,10 @@ const Signup = () => {
                     id="userType"
                     className="w-full h-12 rounded-lg border border-gray-300 px-5 py-3.5 bg-white text-black font-['Space_Grotesk'] appearance-none"
                     {...register("userType", { required: true })}
+                    disabled
+                    defaultValue="venue"
                   >
-                    <option value="performer">Performer</option>
                     <option value="venue">Venues</option>
-                    <option value="users">Users</option>
                   </select>
                   <div className="absolute right-3 top-3.5 pointer-events-none">
                     <svg
@@ -289,7 +289,7 @@ const Signup = () => {
             </p>
 
             {/* Google Login */}
-            <div className="flex justify-center mt-6">
+            {/* <div className="flex justify-center mt-6">
               <Link
               to="/profile"
                 type="button"
@@ -298,7 +298,7 @@ const Signup = () => {
                 <span>Login With Google</span>
                 <FcGoogle size={20} />
               </Link>
-            </div>
+            </div> */}
           </form>
         </div>
       </div>
