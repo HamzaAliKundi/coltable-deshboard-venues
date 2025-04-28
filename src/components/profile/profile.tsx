@@ -130,8 +130,6 @@ const Profile = () => {
   }, [profileData, reset]);
 
   const onSubmit = async (data: any) => {
-    console.log("first", data);
-
     try {
       const transformedData = {
         name: data.venueName,
