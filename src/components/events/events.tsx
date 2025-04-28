@@ -142,13 +142,13 @@ const Events = () => {
           <Link to="/event/create-event" className="font-['Space_Grotesk']">
             Create event
           </Link>
-          <Link to="/calendar">
+          {/* <Link to="/calendar">
             <img
               src="/events/calendar.svg"
               alt="calendar"
               className="w-8 h-8 md:w-auto md:h-auto"
             />
-          </Link>
+          </Link> */}
         </div>
       </div>
 
