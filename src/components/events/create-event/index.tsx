@@ -7,7 +7,7 @@ import {
 } from "../../../apis/events";
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 type FormData = {
@@ -29,11 +29,15 @@ type FormData = {
   dressingArea: string;
   musicDeadline: string;
   specialRequests?: string;
+  logo: string;
 };
 
 const CreateEvent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [logoPreview, setLogoPreview] = useState("");
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoUrl, setLogoUrl] = useState("");
 
   const [addEventByVenue, { isLoading: createEventLoading }] =
     useAddEventByVenueMutation();
@@ -50,6 +54,81 @@ const CreateEvent = () => {
     reset,
     formState: { errors },
   } = useForm<FormData>();
+
+  const handleLogoUpload = async () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/jpeg,image/png,image/gif";
+
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        try {
+          setLogoUploading(true);
+          // First show preview
+          const reader = new FileReader();
+          reader.onload = () => {
+            setLogoPreview(reader.result as string);
+          };
+          reader.readAsDataURL(file);
+
+          // Create timestamp for signature
+          const timestamp = Math.round(new Date().getTime() / 1000).toString();
+
+          // Create the string to sign
+          const str_to_sign = `timestamp=${timestamp}${
+            import.meta.env.VITE_CLOUDINARY_API_SECRET
+          }`;
+
+          // Generate SHA-1 signature
+          const signature = await generateSHA1(str_to_sign);
+
+          // Upload to Cloudinary using signed upload
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("api_key", import.meta.env.VITE_CLOUDINARY_API_KEY);
+          formData.append("timestamp", timestamp);
+          formData.append("signature", signature);
+
+          const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${
+              import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+            }/image/upload`,
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || "Upload failed");
+          }
+
+          const data = await response.json();
+          setLogoUrl(data.secure_url);
+          toast.success("Logo uploaded successfully!");
+        } catch (error) {
+          console.error("Failed to upload logo:", error);
+          toast.error("Failed to upload logo. Please try again.");
+        } finally {
+          setLogoUploading(false); // Upload complete
+        }
+      }
+    };
+
+    input.click();
+  };
+
+  const generateSHA1 = async (message: string) => {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest("SHA-1", msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    return hashHex;
+  };
 
   useEffect(() => {
     if (id && getEventsByVenuesById?.event) {
@@ -81,13 +160,19 @@ const CreateEvent = () => {
         soundEquipment:
           getEventsByVenuesById.event.isEquipmentProvidedByVenue || "",
         performerNumbers: getEventsByVenuesById.event.assignedPerformers || "",
-
         eventCategory: getEventsByVenuesById.event.eventCategory || "",
       });
+
+      if (getEventsByVenuesById?.event?.logo) {
+        setLogoUrl(getEventsByVenuesById.event.logo);
+        setLogoPreview(getEventsByVenuesById.event.logo);
+      }
     }
   }, [id, getEventsByVenuesById, reset]);
 
   const onSubmit = async (data: FormData) => {
+    console.log("abcd", data);
+
     const transformedData = {
       title: data.eventName,
       host: data.eventHost,
@@ -106,7 +191,8 @@ const CreateEvent = () => {
       performers: data.performersCount,
       musicFormat: data.musicDeadline,
       assignedPerformers: data.performerNumbers,
-      // eventCategory: data.eventCategory,
+      logo: logoUrl,
+      eventCategory: data.eventCategory,
     };
 
     try {
@@ -129,7 +215,8 @@ const CreateEvent = () => {
     }
   };
 
-  const isSubmitting = createEventLoading || updateEventLoading;
+  const isSubmitting =
+    createEventLoading || updateEventLoading || logoUploading;
 
   if (getEventLoading) {
     return (
@@ -697,6 +784,43 @@ const CreateEvent = () => {
             className="w-full bg-[#0D0D0D] rounded-lg p-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
             {...register("specialRequests")}
           />
+        </div>
+
+        {/* Logo Upload */}
+        <div className="w-full max-w-[782px] bg-black p-4">
+          <h2 className="font-['Space_Grotesk'] text-white text-[20px] leading-[100%] mb-4">
+            Upload Logo
+          </h2>
+
+          <div
+            className="bg-[#0D0D0D] rounded-[16px] px-8 py-3 text-center 
+               cursor-pointer"
+            onClick={handleLogoUpload}
+          >
+            {logoPreview ? (
+              <div className="flex flex-col items-center">
+                <img
+                  src={logoPreview}
+                  alt="Venue Logo"
+                  className="w-32 h-32 object-contain mb-4"
+                />
+                <p className="text-[#FF00A2]">Click to change logo</p>
+              </div>
+            ) : (
+              <>
+                <p className="text-[#3D3D3D] font-['Space_Grotesk'] text-[12px] leading-[100%] tracking-[0%] text-center capitalize mb-2">
+                  Please Upload The Venue Logo In PNG Or JPG Format, With A
+                  Recommended Size
+                </p>
+                <p className="text-[#3D3D3D] font-['Space_Grotesk'] text-[12px] leading-[100%] tracking-[0%] text-center capitalize mb-4">
+                  Of [Specify Dimensions, E.G., 500x500px]
+                </p>
+                <div className="bg-[#FF00A2] text-black rounded-lg px-8 py-3 inline-block font-['Space_Grotesk'] text-[16px] leading-[100%] tracking-[0%] text-center capitalize">
+                  Upload
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Submit Button */}
