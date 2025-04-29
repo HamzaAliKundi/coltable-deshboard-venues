@@ -24,6 +24,7 @@ const Profile = () => {
   const [images, setImages] = useState<string[]>(Array(10).fill(""));
   const [videos, setVideos] = useState<string[]>(Array(10).fill(""));
   const [mediaPreviews, setMediaPreviews] = useState<(MediaItem | string)[]>(Array(4).fill(""));
+  const [uploadingMediaIndex, setUploadingMediaIndex] = useState<number | null>(null);
 
   const [updateProfile, { isLoading: isUpdating }] =
     useUpdateVenueProfileMutation();
@@ -39,6 +40,13 @@ const Profile = () => {
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
+        // Check file size (25MB = 25 * 1024 * 1024 bytes)
+        const maxSize = 25 * 1024 * 1024; // 25MB in bytes
+        if (file.size > maxSize) {
+          toast.error("File size exceeds 25MB limit. Please choose a smaller file.");
+          return;
+        }
+
         try {
           setLogoUploading(true);
           // First show preview
@@ -118,7 +126,15 @@ const Profile = () => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
 
+      // Check file size (25MB = 25 * 1024 * 1024 bytes)
+      const maxSize = 25 * 1024 * 1024; // 25MB in bytes
+      if (file.size > maxSize) {
+        toast.error("File size exceeds 25MB limit. Please choose a smaller file.");
+        return;
+      }
+
       try {
+        setUploadingMediaIndex(index);
         // First show preview
         const previewUrl = URL.createObjectURL(file);
         const isVideo = file.type.startsWith("video/");
@@ -189,6 +205,8 @@ const Profile = () => {
         const newPreviews = [...mediaPreviews];
         newPreviews[index] = "";
         setMediaPreviews(newPreviews);
+      } finally {
+        setUploadingMediaIndex(null);
       }
     };
 
@@ -200,7 +218,11 @@ const Profile = () => {
     if (!media) {
       return (
         <div className="w-full h-full flex items-center justify-center">
-          <span className="text-[#383838] text-2xl md:text-3xl">+</span>
+          {uploadingMediaIndex === index ? (
+            <div className="w-8 h-8 border-4 border-[#FF00A2] border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            <span className="text-[#383838] text-2xl md:text-3xl">+</span>
+          )}
         </div>
       );
     }
@@ -213,6 +235,11 @@ const Profile = () => {
 
     return (
       <div className="w-full h-full relative">
+        {uploadingMediaIndex === index ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70">
+            <div className="w-8 h-8 border-4 border-[#FF00A2] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : null}
         {isVideo ? (
           <div className="relative w-full h-full">
             <video
@@ -618,16 +645,20 @@ const Profile = () => {
             <div className="flex flex-row gap-3 justify-center mt-6 md:mt-8">
               <button
                 type="submit"
-                disabled={!isEditing || isUpdating || logoUploading}
+                disabled={!isEditing || isUpdating || logoUploading || uploadingMediaIndex !== null}
                 className={`w-full py-2.5 px-6 bg-[#FF00A2] text-white rounded-xl font-semibold transition duration-200 ${
-                  (!isEditing || isUpdating || logoUploading) &&
+                  (!isEditing || isUpdating || logoUploading || uploadingMediaIndex !== null) &&
                   "opacity-50 cursor-not-allowed"
                 }`}
               >
-                {isUpdating ? (
+                {isUpdating || logoUploading || uploadingMediaIndex !== null ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Publishing...</span>
+                    <span>
+                      {isUpdating ? "Publishing..." : 
+                       logoUploading ? "Uploading logo..." : 
+                       "Uploading media..."}
+                    </span>
                   </div>
                 ) : (
                   "Publish/Update"
