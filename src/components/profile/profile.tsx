@@ -8,13 +8,23 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 // import { v2 as cloudinary } from "cloudinary";
 
+interface MediaItem {
+  url: string;
+  type: "image" | "video";
+}
+
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
+  const [mediaUrls, setMediaUrls] = useState<(MediaItem | string)[]>(Array(10).fill(""));
   const [logoUrl, setLogoUrl] = useState("");
   const [logoPreview, setLogoPreview] = useState("");
   const { register, handleSubmit, control, reset } = useForm();
   const venueId = JSON.parse(localStorage.getItem("venueId") || '""');
   const [logoUploading, setLogoUploading] = useState(false);
+  const [images, setImages] = useState<string[]>(Array(10).fill(""));
+  const [videos, setVideos] = useState<string[]>(Array(10).fill(""));
+  const [mediaPreviews, setMediaPreviews] = useState<(MediaItem | string)[]>(Array(4).fill(""));
+  const [uploadingMediaIndex, setUploadingMediaIndex] = useState<number | null>(null);
 
   const [updateProfile, { isLoading: isUpdating }] =
     useUpdateVenueProfileMutation();
@@ -30,6 +40,13 @@ const Profile = () => {
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
+        // Check file size (25MB = 25 * 1024 * 1024 bytes)
+        const maxSize = 25 * 1024 * 1024; // 25MB in bytes
+        if (file.size > maxSize) {
+          toast.error("File size exceeds 25MB limit. Please choose a smaller file.");
+          return;
+        }
+
         try {
           setLogoUploading(true);
           // First show preview
@@ -97,6 +114,171 @@ const Profile = () => {
     return hashHex;
   };
 
+  const handleMediaSelect = async (index: number) => {
+    if (!isEditing) return;
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/jpeg,image/png,image/gif,video/mp4,video/quicktime";
+    input.multiple = false;
+
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      // Check file size (25MB = 25 * 1024 * 1024 bytes)
+      const maxSize = 25 * 1024 * 1024; // 25MB in bytes
+      if (file.size > maxSize) {
+        toast.error("File size exceeds 25MB limit. Please choose a smaller file.");
+        return;
+      }
+
+      try {
+        setUploadingMediaIndex(index);
+        // First show preview
+        const previewUrl = URL.createObjectURL(file);
+        const isVideo = file.type.startsWith("video/");
+
+        const newPreviews = [...mediaPreviews];
+        newPreviews[index] = isVideo
+          ? { url: previewUrl, type: "video" }
+          : previewUrl;
+        setMediaPreviews(newPreviews);
+
+        // Create timestamp for signature
+        const timestamp = Math.round(new Date().getTime() / 1000).toString();
+
+        // Create the string to sign
+        const str_to_sign = `timestamp=${timestamp}${
+          import.meta.env.VITE_CLOUDINARY_API_SECRET
+        }`;
+
+        // Generate SHA-1 signature
+        const signature = await generateSHA1(str_to_sign);
+
+        // Upload to Cloudinary using signed upload
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("api_key", import.meta.env.VITE_CLOUDINARY_API_KEY);
+        formData.append("timestamp", timestamp);
+        formData.append("signature", signature);
+
+        // Use different upload endpoints for images vs videos
+        const resourceType = isVideo ? "video" : "image";
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${
+            import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+          }/${resourceType}/upload`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Upload failed");
+        }
+
+        const data = await response.json();
+
+        // Store the Cloudinary URL with type info
+        if (resourceType === "image") {
+          const newImages = [...images];
+          newImages[index] = data.secure_url;
+          setImages(newImages);
+        } else {
+          const newVideos = [...videos];
+          newVideos[index] = data.secure_url;
+          setVideos(newVideos);
+        }
+
+        toast.success(
+          `${
+            resourceType === "image" ? "Image" : "Video"
+          } uploaded successfully!`
+        );
+      } catch (error) {
+        console.error("Failed to upload media:", error);
+        toast.error("Failed to upload media. Please try again.");
+
+        // Reset preview on error
+        const newPreviews = [...mediaPreviews];
+        newPreviews[index] = "";
+        setMediaPreviews(newPreviews);
+      } finally {
+        setUploadingMediaIndex(null);
+      }
+    };
+
+    input.click();
+  };
+
+  // Render media preview
+  const renderMediaPreview = (media: MediaItem | string, index: number) => {
+    if (!media) {
+      return (
+        <div className="w-full h-full flex items-center justify-center">
+          {uploadingMediaIndex === index ? (
+            <div className="w-8 h-8 border-4 border-[#FF00A2] border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            <span className="text-[#383838] text-2xl md:text-3xl">+</span>
+          )}
+        </div>
+      );
+    }
+
+    const isVideo = typeof media === "object" && media.type === "video";
+    const isImage =
+      typeof media === "string" ||
+      (typeof media === "object" && media.type === "image");
+    const url = typeof media === "string" ? media : media.url;
+
+    return (
+      <div className="w-full h-full relative">
+        {uploadingMediaIndex === index ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70">
+            <div className="w-8 h-8 border-4 border-[#FF00A2] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : null}
+        {isVideo ? (
+          <div className="relative w-full h-full">
+            <video
+              className="w-full h-full object-cover"
+              src={url}
+              controls
+              controlsList="nodownload noremoteplayback noplaybackrate"
+              onClick={(e) => e.stopPropagation()}
+            />
+            {isEditing && (
+              <button
+                className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleMediaSelect(index);
+                }}
+              >
+                Change
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            <img
+              src={url}
+              alt={`Preview ${index + 1}`}
+              className="w-full h-full object-cover"
+            />
+            {isEditing && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity">
+                <span className="text-white text-lg">Click to change</span>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
+
   useEffect(() => {
     if (profileData?.user) {
       const [openingTime = "18:00", closingTime = "03:00"] =
@@ -125,6 +307,19 @@ const Profile = () => {
         setLogoPreview(profileData.user.logo);
       }
 
+      // Set images and videos from user data
+      if (profileData.user.images) {
+        const imagePreviews = profileData.user.images.map((url: string) => url);
+        setImages(imagePreviews);
+        setMediaPreviews(imagePreviews);
+      }
+      
+      if (profileData.user.videos) {
+        const videoPreviews = profileData.user.videos.map((url: string) => ({ url, type: "video" }));
+        setVideos(profileData.user.videos);
+        setMediaPreviews(prev => [...prev, ...videoPreviews]);
+      }
+
       reset(formData);
     }
   }, [profileData, reset]);
@@ -135,7 +330,6 @@ const Profile = () => {
         name: data.venueName,
         description: data.aboutVenue,
         topDragPerformers: data.topPerformers,
-
         location: data.location,
         hoursOfOperation: `${data.openingTime} - ${data.closingTime}`,
         venueType: data.venueType,
@@ -143,6 +337,8 @@ const Profile = () => {
           ? data.facilities.map((item: any) => item.value)
           : [],
         logo: logoUrl,
+        images: images.filter((url) => url !== ""),
+        videos: videos.filter((url) => url !== ""),
         socialMediaLinks: {
           facebook: data.facebook,
           instagram: data.instagram,
@@ -418,21 +614,51 @@ const Profile = () => {
             </div>
           </div>
 
+          {/* Upload Images/Video */}
+          <div className="max-w-[900px] w-full">
+            <h2 className="font-['Space_Grotesk'] text-white font-normal text-[24px] md:text-[36px] leading-[100%] capitalize">
+              Upload images/video
+            </h2>
+            <p className="font-['Space_Grotesk'] mt-4 md:mt-6 text-white font-normal text-[12px] md:text-[13px] leading-[120%] md:leading-[100%] align-middle">
+              Upload JPG, PNG, GIF, or MP4. Maximum 10 photos & 10 video clips
+              (max 25MB, 1200x800px or larger for images).
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mt-5 md:mt-7">
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((index) => (
+                <div
+                  key={index}
+                  onClick={() => handleMediaSelect(index)}
+                  className={`aspect-square w-full max-w-[214px] bg-[#0D0D0D] rounded-[12px] md:rounded-[16px] overflow-hidden ${
+                    isEditing
+                      ? "cursor-pointer hover:bg-[#1A1A1A] transition-colors"
+                      : "cursor-default"
+                  }`}
+                >
+                  {renderMediaPreview(mediaPreviews[index], index)}
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Buttons */}
           {isEditing && (
             <div className="flex flex-row gap-3 justify-center mt-6 md:mt-8">
               <button
                 type="submit"
-                disabled={!isEditing || isUpdating || logoUploading}
+                disabled={!isEditing || isUpdating || logoUploading || uploadingMediaIndex !== null}
                 className={`w-full py-2.5 px-6 bg-[#FF00A2] text-white rounded-xl font-semibold transition duration-200 ${
-                  (!isEditing || isUpdating || logoUploading) &&
+                  (!isEditing || isUpdating || logoUploading || uploadingMediaIndex !== null) &&
                   "opacity-50 cursor-not-allowed"
                 }`}
               >
-                {isUpdating ? (
+                {isUpdating || logoUploading || uploadingMediaIndex !== null ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Publishing...</span>
+                    <span>
+                      {isUpdating ? "Publishing..." : 
+                       logoUploading ? "Uploading logo..." : 
+                       "Uploading media..."}
+                    </span>
                   </div>
                 ) : (
                   "Publish/Update"
