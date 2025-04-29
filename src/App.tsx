@@ -13,6 +13,7 @@ import EventsPage from "./pages/events";
 import CreateEvent from "./components/events/create-event";
 import Privacy from "./components/privacy";
 import Terms from "./components/terms";
+import EventPreview from "./pages/events/event-preview";
 function App() {
   return (
     <BrowserRouter>
@@ -30,6 +31,7 @@ function App() {
             <Route path="tools" element={<ToolsPage />} />
             <Route path="review" element={<ReviewsPage />} />
             <Route path="events" element={<EventsPage />} />
+            <Route path="events/event-preview/:id" element={<EventPreview />} />
             <Route path="event/create-event" element={<CreateEvent />} />
             <Route path="event/create-event/:id" element={<CreateEvent />} />
             <Route path="privacy" element={<Privacy />} />
