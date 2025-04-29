@@ -163,9 +163,9 @@ const CreateEvent = () => {
         eventCategory: getEventsByVenuesById.event.eventCategory || "",
       });
 
-      if (getEventsByVenuesById?.event?.logo) {
-        setLogoUrl(getEventsByVenuesById.event.logo);
-        setLogoPreview(getEventsByVenuesById.event.logo);
+      if (getEventsByVenuesById?.event?.image) {
+        setLogoUrl(getEventsByVenuesById.event.image);
+        setLogoPreview(getEventsByVenuesById.event.image);
       }
     }
   }, [id, getEventsByVenuesById, reset]);
@@ -191,7 +191,7 @@ const CreateEvent = () => {
       performers: data.performersCount,
       musicFormat: data.musicDeadline,
       assignedPerformers: data.performerNumbers,
-      logo: logoUrl,
+      image: logoUrl,
       eventCategory: data.eventCategory,
     };
 
@@ -787,7 +787,7 @@ const CreateEvent = () => {
         </div>
 
         {/* Logo Upload */}
-        <div className="w-full max-w-[782px] bg-black p-4">
+        <div className="w-full max-w-[782px] self-center bg-black p-4">
           <h2 className="font-['Space_Grotesk'] text-white text-[20px] leading-[100%] mb-4">
             Upload Logo
           </h2>

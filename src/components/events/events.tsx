@@ -223,7 +223,7 @@ const Events = () => {
                   </div>
 
                   <div className="mt-4 space-y-2">
-                    <Link to={`/event-details/${event._id}`}>
+                    <Link to={`/events/event-preview/${event._id}`}>
                       <button className="w-full h-[35px] bg-[#FF00A2] text-white text-xs font-medium rounded-[30px]">
                         VIEW DETAILS
                       </button>
