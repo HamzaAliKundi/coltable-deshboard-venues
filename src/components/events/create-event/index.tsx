@@ -1,5 +1,5 @@
 import { Calendar, ChevronDown } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import {
   useAddEventByVenueMutation,
   useGetEventsByVenuesByIdQuery,
@@ -30,6 +30,7 @@ type FormData = {
   musicDeadline: string;
   specialRequests?: string;
   logo: string;
+  performers: string[];
 };
 
 const CreateEvent = () => {
@@ -52,6 +53,7 @@ const CreateEvent = () => {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<FormData>();
 
@@ -189,6 +191,8 @@ const CreateEvent = () => {
       isEquipmentProvidedByVenue: data.soundEquipment,
       isEquipmentProvidedByPerformer: data.equipmentResponsibility,
       performers: data.performersCount,
+      // performersList: data.performers,
+
       musicFormat: data.musicDeadline,
       assignedPerformers: data.performerNumbers,
       image: logoUrl,
@@ -214,6 +218,9 @@ const CreateEvent = () => {
       );
     }
   };
+
+  const labelClass =
+    "block font-['Space_Grotesk'] font-normal text-[14px] md:text-[20px] leading-[100%] text-white mb-2";
 
   const isSubmitting =
     createEventLoading || updateEventLoading || logoUploading;
@@ -402,6 +409,64 @@ const CreateEvent = () => {
               </span>
             )}
           </div>
+        </div>
+
+        {/* Performers */}
+        <div>
+          <label className={labelClass}>Performer(s)</label>
+          <Controller
+            name="performers"
+            control={control}
+            defaultValue={[]}
+            render={({ field }) => (
+              <div className="w-full">
+                <div className="min-h-[35px] bg-[#0D0D0D] border border-[#383838] rounded-[10px] p-2 flex flex-wrap gap-2">
+                  {(Array.isArray(field.value) ? field.value : []).map(
+                    (performer: string, index: number) => (
+                      <div
+                        key={index}
+                        className="bg-[#383838] rounded-[4px] px-2 py-1 flex items-center gap-2"
+                      >
+                        <span className="text-white">{performer}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updatedPerformers = [...field.value];
+                            updatedPerformers.splice(index, 1);
+                            field.onChange(updatedPerformers);
+                          }}
+                          className="text-white hover:text-[#FF00A2]"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )
+                  )}
+                  <input
+                    type="text"
+                    placeholder="Type and press Enter"
+                    className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-white placeholder-[#383838]"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const input = e.target as HTMLInputElement;
+                        const value = input.value.trim();
+                        if (value) {
+                          const currentPerformers = Array.isArray(field.value)
+                            ? [...field.value]
+                            : [];
+                          if (!currentPerformers.includes(value)) {
+                            field.onChange([...currentPerformers, value]);
+                          }
+                          input.value = "";
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          />
         </div>
 
         {/* Equipment Responsibility */}
