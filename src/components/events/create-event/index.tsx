@@ -9,6 +9,8 @@ import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Select from "react-select";
+import { useGetAllPerformersQuery } from "../../../apis/performer";
 
 type FormData = {
   eventName: string;
@@ -30,7 +32,7 @@ type FormData = {
   musicDeadline: string;
   specialRequests?: string;
   logo: string;
-  performers: string[];
+  performersList: string[];
 };
 
 const CreateEvent = () => {
@@ -48,6 +50,8 @@ const CreateEvent = () => {
     useGetEventsByVenuesByIdQuery(id, {
       skip: !id,
     });
+
+  const { data: performersData } = useGetAllPerformersQuery();
 
   const {
     register,
@@ -138,7 +142,6 @@ const CreateEvent = () => {
         eventName: getEventsByVenuesById.event.title || "",
         eventHost: getEventsByVenuesById.event.host || "",
         eventType: getEventsByVenuesById.event.type || "",
-        eventTheme: getEventsByVenuesById.event.theme || "",
         audienceType: getEventsByVenuesById.event.audienceType,
         startTime: getEventsByVenuesById.event.startTime
           ? new Date(getEventsByVenuesById.event.startTime)
@@ -163,6 +166,7 @@ const CreateEvent = () => {
           getEventsByVenuesById.event.isEquipmentProvidedByVenue || "",
         performerNumbers: getEventsByVenuesById.event.assignedPerformers || "",
         eventCategory: getEventsByVenuesById.event.eventCategory || "",
+        performersList: getEventsByVenuesById.event.performersList || [],
       });
 
       if (getEventsByVenuesById?.event?.image) {
@@ -173,13 +177,12 @@ const CreateEvent = () => {
   }, [id, getEventsByVenuesById, reset]);
 
   const onSubmit = async (data: FormData) => {
-    console.log("abcd", data);
+    console.log("okkkk", data);
 
     const transformedData = {
       title: data.eventName,
       host: data.eventHost,
       type: data.eventType,
-      theme: data.eventTheme,
       startTime: new Date(data.startTime).toISOString(),
       endTime: new Date(data.endTime).toISOString(),
       specialRequirements: data.specialRequests,
@@ -191,7 +194,7 @@ const CreateEvent = () => {
       isEquipmentProvidedByVenue: data.soundEquipment,
       isEquipmentProvidedByPerformer: data.equipmentResponsibility,
       performers: data.performersCount,
-      // performersList: data.performers,
+      performersList: data.performersList,
 
       musicFormat: data.musicDeadline,
       assignedPerformers: data.performerNumbers,
@@ -371,8 +374,9 @@ const CreateEvent = () => {
             )}
           </div>
         </div>
-        {/* Event Type and Theme */}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Event Type and Theme */}
           <div className="flex flex-col gap-2">
             <label className="text-white font-space-grotesk text-sm md:text-base">
               Event Category*
@@ -391,82 +395,108 @@ const CreateEvent = () => {
               </span>
             )}
           </div>
-          <div className="flex flex-col gap-2">
-            <label className="text-white font-space-grotesk text-sm md:text-base">
-              Event Theme*
-            </label>
-            <input
-              type="text"
-              placeholder="Event Theme"
-              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
-              {...register("eventTheme", {
-                required: "Event theme information is required",
-              })}
-            />
-            {errors.eventTheme && (
-              <span className="text-red-500 text-sm">
-                {errors.eventTheme.message}
-              </span>
-            )}
-          </div>
-        </div>
 
-        {/* Performers */}
-        <div>
-          <label className={labelClass}>Performer(s)</label>
-          <Controller
-            name="performers"
-            control={control}
-            defaultValue={[]}
-            render={({ field }) => (
-              <div className="w-full">
-                <div className="min-h-[35px] bg-[#0D0D0D] border border-[#383838] rounded-[10px] p-2 flex flex-wrap gap-2">
-                  {(Array.isArray(field.value) ? field.value : []).map(
-                    (performer: string, index: number) => (
-                      <div
-                        key={index}
-                        className="bg-[#383838] rounded-[4px] px-2 py-1 flex items-center gap-2"
-                      >
-                        <span className="text-white">{performer}</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const updatedPerformers = [...field.value];
-                            updatedPerformers.splice(index, 1);
-                            field.onChange(updatedPerformers);
-                          }}
-                          className="text-white hover:text-[#FF00A2]"
-                        >
-                          ×
-                        </button>
-                      </div>
+          {/* Performers List */}
+          <div className="mt-1">
+            <label className={labelClass}>Top Drag Performers*</label>
+            <Controller
+              name="performersList"
+              control={control}
+              defaultValue={[]}
+              rules={{ required: true }}
+              render={({ field }) => {
+                const selectedOptions =
+                  performersData
+                    ?.filter((performer: any) =>
+                      field.value?.includes(performer._id)
                     )
-                  )}
-                  <input
-                    type="text"
-                    placeholder="Type and press Enter"
-                    className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-white placeholder-[#383838]"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        const input = e.target as HTMLInputElement;
-                        const value = input.value.trim();
-                        if (value) {
-                          const currentPerformers = Array.isArray(field.value)
-                            ? [...field.value]
-                            : [];
-                          if (!currentPerformers.includes(value)) {
-                            field.onChange([...currentPerformers, value]);
-                          }
-                          input.value = "";
-                        }
-                      }
+                    ?.map((performer: any) => ({
+                      value: performer._id,
+                      label: performer.fullDragName || "Unnamed Performer",
+                    })) || [];
+
+                return (
+                  <Select
+                    value={selectedOptions}
+                    onChange={(options) => {
+                      const selectedIds =
+                        options?.map((option) => option.value) || [];
+                      field.onChange(selectedIds);
                     }}
+                    isMulti
+                    closeMenuOnSelect={false}
+                    options={performersData?.map((performer: any) => ({
+                      value: performer._id,
+                      label: performer.fullDragName || "Unnamed Performer",
+                    }))}
+                    className="w-full"
+                    styles={{
+                      control: (base) => ({
+                        ...base,
+                        minHeight: "41px",
+                        background: "#0D0D0D",
+                        border: "0px solid transparent",
+                        borderRadius: "6px",
+                        boxShadow: "none",
+                        "&:hover": {
+                          border: "1px solid #383838",
+                        },
+                      }),
+                      menu: (base) => ({
+                        ...base,
+                        background: "#1D1D1D",
+                        border: "1px solid #383838",
+                        borderRadius: "4px",
+                      }),
+                      option: (base, state) => ({
+                        ...base,
+                        background: state.isFocused ? "#383838" : "#1D1D1D",
+                        color: "#fff",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        "&::before": {
+                          content: '""',
+                          display: "block",
+                          width: "16px",
+                          height: "16px",
+                          border: "2px solid #fff",
+                          borderRadius: "50%",
+                          backgroundColor: state.isSelected
+                            ? "#FF00A2"
+                            : "transparent",
+                        },
+                      }),
+                      multiValue: (base) => ({
+                        ...base,
+                        background: "#383838",
+                        borderRadius: "4px",
+                      }),
+                      multiValueLabel: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+                      multiValueRemove: (base) => ({
+                        ...base,
+                        color: "#fff",
+                        ":hover": {
+                          background: "#4a4a4a",
+                          borderRadius: "0 4px 4px 0",
+                        },
+                      }),
+                      input: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+                    }}
+                    placeholder="Select top drag performers"
+                    noOptionsMessage={() => "No performers available"}
                   />
-                </div>
-              </div>
-            )}
-          />
+                );
+              }}
+            />
+          </div>
         </div>
 
         {/* Equipment Responsibility */}

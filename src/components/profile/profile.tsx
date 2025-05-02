@@ -1,5 +1,4 @@
 import { Controller, useForm } from "react-hook-form";
-import Select from "react-select";
 import {
   useGetSingleVenueByIdQuery,
   useUpdateVenueProfileMutation,
@@ -7,6 +6,8 @@ import {
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 // import { v2 as cloudinary } from "cloudinary";
+import Select from "react-select";
+import CustomSelect from "../../utils/CustomSelect";
 
 interface MediaItem {
   url: string;
@@ -15,7 +16,9 @@ interface MediaItem {
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [mediaUrls, setMediaUrls] = useState<(MediaItem | string)[]>(Array(10).fill(""));
+  const [mediaUrls, setMediaUrls] = useState<(MediaItem | string)[]>(
+    Array(10).fill("")
+  );
   const [logoUrl, setLogoUrl] = useState("");
   const [logoPreview, setLogoPreview] = useState("");
   const { register, handleSubmit, control, reset } = useForm();
@@ -23,8 +26,18 @@ const Profile = () => {
   const [logoUploading, setLogoUploading] = useState(false);
   const [images, setImages] = useState<string[]>(Array(10).fill(""));
   const [videos, setVideos] = useState<string[]>(Array(10).fill(""));
-  const [mediaPreviews, setMediaPreviews] = useState<(MediaItem | string)[]>(Array(4).fill(""));
-  const [uploadingMediaIndex, setUploadingMediaIndex] = useState<number | null>(null);
+  const [mediaPreviews, setMediaPreviews] = useState<(MediaItem | string)[]>(
+    Array(4).fill("")
+  );
+  const [uploadingMediaIndex, setUploadingMediaIndex] = useState<number | null>(
+    null
+  );
+
+  const venueOptions = [
+    { value: "Bar/Club", label: "Bar/Club" },
+    { value: "Restaurants/Dining", label: "Restaurants/Dining" },
+    { value: "Other", label: "Other" },
+  ];
 
   const [updateProfile, { isLoading: isUpdating }] =
     useUpdateVenueProfileMutation();
@@ -43,7 +56,9 @@ const Profile = () => {
         // Check file size (25MB = 25 * 1024 * 1024 bytes)
         const maxSize = 25 * 1024 * 1024; // 25MB in bytes
         if (file.size > maxSize) {
-          toast.error("File size exceeds 25MB limit. Please choose a smaller file.");
+          toast.error(
+            "File size exceeds 25MB limit. Please choose a smaller file."
+          );
           return;
         }
 
@@ -129,7 +144,9 @@ const Profile = () => {
       // Check file size (25MB = 25 * 1024 * 1024 bytes)
       const maxSize = 25 * 1024 * 1024; // 25MB in bytes
       if (file.size > maxSize) {
-        toast.error("File size exceeds 25MB limit. Please choose a smaller file.");
+        toast.error(
+          "File size exceeds 25MB limit. Please choose a smaller file."
+        );
         return;
       }
 
@@ -313,11 +330,14 @@ const Profile = () => {
         setImages(imagePreviews);
         setMediaPreviews(imagePreviews);
       }
-      
+
       if (profileData.user.videos) {
-        const videoPreviews = profileData.user.videos.map((url: string) => ({ url, type: "video" }));
+        const videoPreviews = profileData.user.videos.map((url: string) => ({
+          url,
+          type: "video",
+        }));
         setVideos(profileData.user.videos);
-        setMediaPreviews(prev => [...prev, ...videoPreviews]);
+        setMediaPreviews((prev) => [...prev, ...videoPreviews]);
       }
 
       reset(formData);
@@ -325,6 +345,7 @@ const Profile = () => {
   }, [profileData, reset]);
 
   const onSubmit = async (data: any) => {
+    console.log("objectt", data);
     try {
       const transformedData = {
         name: data.venueName,
@@ -364,7 +385,7 @@ const Profile = () => {
     );
 
   const inputClass =
-    "w-full max-w-[782px] h-[46px] rounded-[16px] bg-[#0D0D0D] text-[#383838] px-4 py-2.5 font-['Space_Grotesk'] text-[16px] md:text-[20px] leading-[100%] capitalize placeholder-[#383838] focus:outline-none focus:ring-2 focus:ring-[#FF00A2]";
+    "w-full max-w-[700px] h-[46px] rounded-[16px] bg-[#0D0D0D] text-[#383838] px-4 py-2.5 font-['Space_Grotesk'] text-[16px] md:text-[20px] leading-[100%] capitalize placeholder-[#383838] focus:outline-none focus:ring-2 focus:ring-[#FF00A2]";
   const labelClass =
     "block font-['Space_Grotesk'] font-normal text-[14px] md:text-[20px] leading-[100%] capitalize text-white mb-2";
 
@@ -451,19 +472,25 @@ const Profile = () => {
           </div>
 
           {/* Type of Venue */}
-          <div>
+          <div className="w-full">
             <label className={labelClass}>Type of Venue*</label>
+
             <Controller
               name="venueType"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
-                <select {...field} disabled={!isEditing} className={inputClass}>
-                  <option value="">Select venue type</option>
-                  <option value="Bar/Club">Bar/Club</option>
-                  <option value="Restaurants/Dining">Restaurants/Dining</option>
-                  <option value="Other">Other</option>
-                </select>
+                <CustomSelect
+                  {...field}
+                  value={venueOptions.find(
+                    (option) => option.value === field.value
+                  )}
+                  onChange={(selectedOption) =>
+                    field.onChange(selectedOption?.value)
+                  }
+                  options={venueOptions}
+                  isDisabled={false}
+                  placeholder="Select venue type"
+                />
               )}
             />
           </div>
@@ -645,9 +672,17 @@ const Profile = () => {
             <div className="flex flex-row gap-3 justify-center mt-6 md:mt-8">
               <button
                 type="submit"
-                disabled={!isEditing || isUpdating || logoUploading || uploadingMediaIndex !== null}
+                disabled={
+                  !isEditing ||
+                  isUpdating ||
+                  logoUploading ||
+                  uploadingMediaIndex !== null
+                }
                 className={`w-full py-2.5 px-6 bg-[#FF00A2] text-white rounded-xl font-semibold transition duration-200 ${
-                  (!isEditing || isUpdating || logoUploading || uploadingMediaIndex !== null) &&
+                  (!isEditing ||
+                    isUpdating ||
+                    logoUploading ||
+                    uploadingMediaIndex !== null) &&
                   "opacity-50 cursor-not-allowed"
                 }`}
               >
@@ -655,9 +690,11 @@ const Profile = () => {
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     <span>
-                      {isUpdating ? "Publishing..." : 
-                       logoUploading ? "Uploading logo..." : 
-                       "Uploading media..."}
+                      {isUpdating
+                        ? "Publishing..."
+                        : logoUploading
+                        ? "Uploading logo..."
+                        : "Uploading media..."}
                     </span>
                   </div>
                 ) : (
