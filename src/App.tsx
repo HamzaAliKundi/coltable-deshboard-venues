@@ -11,9 +11,14 @@ import ToolsPage from "./pages/tools";
 import ReviewsPage from "./pages/reviews";
 import EventsPage from "./pages/events";
 import CreateEvent from "./components/events/create-event";
+import VerificationSuccess from "./components/auth/VerificationSuccess";
+import EmailVerification from "./components/auth/EmailVerification";
 import Privacy from "./components/privacy";
 import Terms from "./components/terms";
 import EventPreview from "./pages/events/event-preview";
+import ForgotPassword from "./components/auth/forgot-password";
+import ResetPassword from "./components/auth/reset-password";
+
 function App() {
   return (
     <BrowserRouter>
@@ -21,6 +26,10 @@ function App() {
       <Routes>
         <Route element={<PublicRoutes />}>
           <Route path="/" element={<Signup />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-email" element={<EmailVerification />} />
+          <Route path="/verification-success" element={<VerificationSuccess />} />
         </Route>
 
         <Route element={<ProtectedRoutes />}>
