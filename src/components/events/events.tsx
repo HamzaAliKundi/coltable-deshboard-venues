@@ -79,6 +79,19 @@ const Events = () => {
     return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
+  const extractTime = (dateString: string) => {
+    const date = new Date(dateString);
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+
+    return `${hours}:${minutes} ${ampm}`;
+  };
+
   const handleDeleteClick = async (id: string) => {
     try {
       await deleteEventByVenue(id).unwrap();
@@ -177,10 +190,10 @@ const Events = () => {
                   />
                   <div className="absolute top-3 left-3 w-[70px] h-[70px] bg-gradient-to-b from-[#FF00A2] to-[#D876B5] rounded-full flex flex-col items-center justify-center">
                     <span className="text-2xl font-bold text-[#e3d4de] leading-none">
-                      {formatDate(event.startTime)?.slice(3, 6)}
+                      {formatDate(event.startDate)?.slice(3, 6)}
                     </span>
                     <span className="text-lg font-semibold text-[#ebd4e3] uppercase leading-none">
-                      {formatDate(event.startTime)?.slice(0, 3)}
+                      {formatDate(event.startDate)?.slice(0, 3)}
                     </span>
                   </div>
                 </div>
@@ -207,7 +220,7 @@ const Events = () => {
                         className="w-4 h-4"
                       />
                       <p className="font-['Space_Grotesk'] font-normal text-sm leading-none text-white">
-                        {formatDate(event.startTime)}
+                        Starts: {extractTime(event.startTime)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
@@ -217,7 +230,7 @@ const Events = () => {
                         className="w-4 h-4"
                       />
                       <p className="font-['Space_Grotesk'] font-normal text-sm leading-none text-white">
-                        {event.location || "Location not specified"}
+                        {event.location || "N/A"}
                       </p>
                     </div>
                   </div>
