@@ -2,7 +2,7 @@ import React from "react";
 import Select, { Props as SelectProps, ValueType } from "react-select";
 
 interface CustomSelectProps extends SelectProps {
-  options: { value: string; label: string }[]; // You can customize the type based on your needs
+  options: { value: string; label: string }[];
   isDisabled?: boolean;
   placeholder?: string;
   value?: ValueType<{ value: string; label: string }, false>;
@@ -28,7 +28,7 @@ const customStyles = {
   control: (base: any, state: any) => ({
     ...base,
     backgroundColor: "#0D0D0D",
-    borderRadius: "16px",
+    borderRadius: "8px",
     padding: "5px 10px",
     color: "#383838",
     borderColor: state.isFocused ? "#FF00A2" : "#0D0D0D",

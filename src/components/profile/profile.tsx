@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 // import { v2 as cloudinary } from "cloudinary";
 import Select from "react-select";
 import CustomSelect from "../../utils/CustomSelect";
+import { Clock } from "lucide-react";
 
 interface MediaItem {
   url: string;
@@ -385,7 +386,7 @@ const Profile = () => {
     );
 
   const inputClass =
-    "w-full max-w-[700px] h-[46px] rounded-[16px] bg-[#0D0D0D] text-[#383838] px-4 py-2.5 font-['Space_Grotesk'] text-[16px] md:text-[20px] leading-[100%] capitalize placeholder-[#383838] focus:outline-none focus:ring-2 focus:ring-[#FF00A2]";
+    "w-full max-w-[700px] h-[46px] rounded-[16px] bg-[#0D0D0D] text-white px-4 py-2.5 font-['Space_Grotesk'] text-[16px] md:text-[20px] leading-[100%] capitalize placeholder-[#383838] focus:outline-none focus:ring-2 focus:ring-[#FF00A2]";
   const labelClass =
     "block font-['Space_Grotesk'] font-normal text-[14px] md:text-[20px] leading-[100%] capitalize text-white mb-2";
 
@@ -454,20 +455,28 @@ const Profile = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Hours of Operation*</label>
-              <input
-                type="time"
-                className={inputClass}
-                disabled={!isEditing}
-                {...register("openingTime", { required: true })}
-              />
+              <div className="relative">
+                <input
+                  type="time"
+                  className={inputClass}
+                  disabled={!isEditing}
+                  {...register("openingTime", { required: true })}
+                />
+                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <Clock color="white" size={20} />
+                </div>
+              </div>
             </div>
-            <div className="mt-7">
+            <div className="mt-7 relative">
               <input
                 type="time"
                 className={inputClass}
                 disabled={!isEditing}
                 {...register("closingTime", { required: true })}
               />
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <Clock color="white" size={20} />
+              </div>
             </div>
           </div>
 
