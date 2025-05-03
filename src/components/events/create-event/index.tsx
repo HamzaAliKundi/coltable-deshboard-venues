@@ -188,7 +188,9 @@ const CreateEvent = () => {
           getEventsByVenuesById.event.assignedPerformers || ""
         ),
         eventCategory: getEventsByVenuesById.event.eventCategory || "",
-        performersList: getEventsByVenuesById.event.performersList || [],
+        performersList: getEventsByVenuesById.event.performersList.map(
+          (p) => p._id
+        ),
       });
 
       if (getEventsByVenuesById?.event?.image) {
@@ -199,7 +201,6 @@ const CreateEvent = () => {
   }, [id, getEventsByVenuesById, reset]);
 
   const onSubmit = async (data: FormData) => {
-    console.log("okkkk", data);
 
     const today = new Date().toISOString().split("T")[0];
 
@@ -248,7 +249,7 @@ const CreateEvent = () => {
   };
 
   const inputClass =
-    "w-full max-w-[700px] h-[46px] rounded-[16px] bg-[#0D0D0D] text-[#383838] px-4 py-2.5 font-['Space_Grotesk'] text-[16px] md:text-[20px] leading-[100%] capitalize placeholder-[#383838] focus:outline-none focus:ring-2 focus:ring-[#FF00A2]";
+    "w-full max-w-[700px] h-[46px] rounded-[16px] bg-[#0D0D0D] text-[#383838] px-4 py-2.5 font-['Space_Grotesk'] text-[16px] md:text-[16px] leading-[100%] capitalize placeholder-[#383838] focus:outline-none focus:ring-2 focus:ring-[#FF00A2]";
   const labelClass =
     "block font-['Space_Grotesk'] font-normal text-[14px] md:text-[16px] leading-[100%] capitalize text-white mb-2";
 

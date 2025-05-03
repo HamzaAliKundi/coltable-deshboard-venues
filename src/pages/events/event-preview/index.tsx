@@ -1,16 +1,34 @@
-import { format } from "date-fns";
 import { Link, useParams } from "react-router-dom";
 import { useGetEventsByVenuesByIdQuery } from "../../../apis/events";
+import { callTimeOptions } from "../../../utils/createEvent/dropDownData";
 
 const EventPreview = () => {
   const { id } = useParams();
   const { data: getEventsByVenuesById, isLoading: getEventLoading } =
     useGetEventsByVenuesByIdQuery(id);
 
-  const formatDateTime = (dateString: any) => {
-    if (!dateString) return "Not specified";
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return new Date(dateString).toLocaleDateString("en-US", options);
+  };
+
+  const extractTime = (dateString: string) => {
     const date = new Date(dateString);
-    return format(date, "MMMM d, yyyy 'at' h:mm a");
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+
+    return `${hours}:${minutes} ${ampm}`;
   };
 
   const formatEventType = (type: any) => {
@@ -38,7 +56,7 @@ const EventPreview = () => {
 
   return (
     <div className="col-span-1 lg:col-span-8 p-4 md:px-8 py-2 bg-black">
-      <h1 className="font-tangerine text-[64px] text-white font-bold mb-4 lg:mb-8 text-center">
+      <h1 className="font-tangerine text-xl md:text-[64px] text-white font-bold mb-4 lg:mb-8 text-center">
         {getEventsByVenuesById?.event?.title}
       </h1>
 
@@ -47,7 +65,7 @@ const EventPreview = () => {
         <img
           src={getEventsByVenuesById?.event?.image}
           alt={getEventsByVenuesById?.event?.title}
-          className="w-full max-w-[550px] h-auto mx-auto rounded-lg"
+          className="w-full md:max-w-[550px] h-auto mx-auto rounded-lg"
         />
       </div>
 
@@ -77,10 +95,7 @@ const EventPreview = () => {
               <span className="font-medium">Category:</span>{" "}
               {getEventsByVenuesById?.event?.eventCategory || "N/A"}
             </li>
-            <li>
-              <span className="font-medium">Theme:</span>{" "}
-              {getEventsByVenuesById?.event?.theme}
-            </li>
+
             <li>
               <span className="font-medium">Audience:</span>{" "}
               {getEventsByVenuesById?.event?.audienceType === "adults"
@@ -99,21 +114,27 @@ const EventPreview = () => {
           <ul className="text-white/90 space-y-2">
             <li>
               <span className="font-medium">Starts:</span>{" "}
-              {formatDateTime(getEventsByVenuesById?.event?.startTime)}
+              {formatDate(getEventsByVenuesById?.event.startDate)?.slice(0, 12)}
+              {" at "}
+              {extractTime(getEventsByVenuesById?.event.startTime)}
             </li>
             <li>
               <span className="font-medium">Ends:</span>{" "}
-              {formatDateTime(getEventsByVenuesById?.event?.endTime)}
+              {formatDate(getEventsByVenuesById?.event.startDate)?.slice(0, 12)}
+              {" at "}
+              {extractTime(getEventsByVenuesById?.event.endTime)}
             </li>
             <li>
               <span className="font-medium">Call Time:</span>{" "}
-              {getEventsByVenuesById?.event?.eventCallTime === "1-hour"
-                ? "1 hour before"
-                : "Not specified"}
+              {callTimeOptions.find(
+                (opt) =>
+                  opt.value === getEventsByVenuesById?.event?.eventCallTime
+              )?.label || "Not specified"}
             </li>
+
             <li>
               <span className="font-medium">Music Deadline:</span>{" "}
-              {formatDateTime(getEventsByVenuesById?.event?.musicFormat)}
+              {formatDate(getEventsByVenuesById?.event?.musicFormat)}
             </li>
           </ul>
         </div>
@@ -189,7 +210,7 @@ const EventPreview = () => {
       )}
 
       {/* Action Buttons */}
-      <div className="mt-20 flex justify-center gap-4">
+      <div className="mt-20 flex flex-col md:flex-row items-center md:items-start mb-6 md:mb-0 justify-center gap-6 md:gap-4 ">
         <Link
           to={`/event/create-event/${getEventsByVenuesById?.event?._id}`}
           className="w-[222px] h-[62px] bg-[#FF00A2] hover:bg-[#d40085] text-white rounded-[83px] shadow-md font-['Space_Grotesk'] font-normal text-[20px] leading-[100%] uppercase flex items-center justify-center"

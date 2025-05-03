@@ -151,7 +151,7 @@ const Events = () => {
             )}
           </button>
         </div>
-        <div className="absolute -right-4 top-16 flex items-center gap-3 text-white lg:top-0">
+        <div className="absolute md:-right-4 right-0 top-20 md:top-16 flex items-center gap-3 text-white lg:top-0">
           <Link to="/event/create-event" className="font-['Space_Grotesk']">
             Create event
           </Link>
@@ -176,11 +176,11 @@ const Events = () => {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 justify-center md:justify-start">
             {paginatedEvents.map((event: any, index: number) => (
               <div
                 key={`${event._id}-${index}`}
-                className="bg-[#212121] mt-7 rounded-[8px] overflow-hidden w-full max-w-[300px] flex flex-col"
+                className="bg-[#212121] mt-7 rounded-[8px] overflow-hidden w-full max-w-[300px] flex flex-col mx-auto md:mx-0"
               >
                 <div className="p-2 relative">
                   <img
