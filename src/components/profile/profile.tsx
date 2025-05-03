@@ -386,9 +386,9 @@ const Profile = () => {
     );
 
   const inputClass =
-    "w-full max-w-[700px] h-[46px] rounded-[16px] bg-[#0D0D0D] text-white px-4 py-2.5 font-['Space_Grotesk'] text-[16px] md:text-[20px] leading-[100%] capitalize placeholder-[#383838] focus:outline-none focus:ring-2 focus:ring-[#FF00A2]";
+    "w-full max-w-[700px] h-[46px] rounded-[16px] bg-[#0D0D0D] text-white px-4 py-2.5 font-['Space_Grotesk'] text-[16px] md:text-[16px] leading-[100%] capitalize placeholder-[#383838] focus:outline-none focus:ring-2 focus:ring-[#FF00A2]";
   const labelClass =
-    "block font-['Space_Grotesk'] font-normal text-[14px] md:text-[20px] leading-[100%] capitalize text-white mb-2";
+    "block font-['Space_Grotesk'] font-normal text-[14px] md:text-[18px] leading-[100%] capitalize text-white mb-2";
 
   return (
     <>
