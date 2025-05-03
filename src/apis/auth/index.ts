@@ -28,16 +28,16 @@ export const authApi = createApi({
       }),
     }),
     forgotPassword: builder.mutation({
-      query: (email: string) => ({
-        url: "/auth/user/forgot-password",
+      query: (data: { email: string, userType: string }) => ({
+        url: "/auth/user/forget-password",
         method: "POST",
-        body: { email },
+        body: data,
       }),
     }),
     resetPassword: builder.mutation({
-      query: (data: { token: string, password: string }) => ({
+      query: (data: { token: string, newPassword: string, userType: string }) => ({
         url: "/auth/user/reset-password",
-        method: "POST",
+        method: "PATCH",
         body: data,
       }),
     }),
