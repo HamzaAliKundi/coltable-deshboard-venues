@@ -497,7 +497,7 @@ const Profile = () => {
                     field.onChange(selectedOption?.value)
                   }
                   options={venueOptions}
-                  isDisabled={false}
+                  isDisabled={!isEditing}
                   placeholder="Select venue type"
                 />
               )}
