@@ -18,51 +18,16 @@ const Events = () => {
   const {
     data: eventsData,
     isLoading,
+    isFetching,
     refetch,
   } = useGetAllEventsByVenuesQuery({
-    page: 1,
-    limit: 1000,
+    page: currentPage,
+    limit: eventsPerPage,
+    status: activeTab,
   });
+
   const [deleteEventByVenue, { isLoading: isDeleteLoading }] =
     useDeleteEventByVenueMutation();
-
-  const filterEventsByTab = () => {
-    const currentDate = new Date();
-    const currentUTCDate = new Date(
-      Date.UTC(
-        currentDate.getUTCFullYear(),
-        currentDate.getUTCMonth(),
-        currentDate.getUTCDate(),
-        currentDate.getUTCHours(),
-        currentDate.getUTCMinutes()
-      )
-    );
-
-    if (!eventsData?.docs) return [];
-
-    return eventsData.docs.filter((event: any) => {
-      const eventDate = new Date(event.startTime);
-      const isApproved = event.status === "approved";
-      const isPending = event.status === "pending";
-
-      if (activeTab === "upcoming") {
-        return eventDate > currentUTCDate && isApproved;
-      } else if (activeTab === "pending") {
-        return isPending;
-      } else if (activeTab === "past") {
-        return eventDate < currentUTCDate && isApproved;
-      }
-      return true;
-    });
-  };
-
-  const filteredEvents = filterEventsByTab();
-
-  // Paginate events
-  const paginatedEvents = filteredEvents.slice(
-    (currentPage - 1) * eventsPerPage,
-    currentPage * eventsPerPage
-  );
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
@@ -102,6 +67,8 @@ const Events = () => {
       console.error(error);
     }
   };
+
+  const showLoader = isLoading || isFetching;
 
   return (
     <div className="bg-black p-4 md:p-8 w-full mb-32">
@@ -155,29 +122,22 @@ const Events = () => {
           <Link to="/event/create-event" className="font-['Space_Grotesk']">
             Create event
           </Link>
-          {/* <Link to="/calendar">
-            <img
-              src="/events/calendar.svg"
-              alt="calendar"
-              className="w-8 h-8 md:w-auto md:h-auto"
-            />
-          </Link> */}
         </div>
       </div>
 
-      {/* Conditional Rendering Based on Tab */}
-      {isLoading ? (
+      {/* Conditional Rendering */}
+      {showLoader ? (
         <div className="flex justify-center items-center min-h-[300px]">
           <div className="w-8 h-8 border-4 border-[#FF00A2] border-t-transparent rounded-full animate-spin"></div>
         </div>
-      ) : filteredEvents.length === 0 ? (
+      ) : eventsData?.docs?.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-white text-xl">No {activeTab} events found!</p>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 justify-center md:justify-start">
-            {paginatedEvents.map((event: any, index: number) => (
+            {eventsData?.docs?.map((event: any, index: number) => (
               <div
                 key={`${event._id}-${index}`}
                 className="bg-[#212121] mt-7 rounded-[8px] overflow-hidden w-full max-w-[300px] flex flex-col mx-auto md:mx-0"
@@ -190,7 +150,9 @@ const Events = () => {
                   />
                   <div className="absolute top-3 left-3 w-[70px] h-[70px] bg-gradient-to-b from-[#FF00A2] to-[#D876B5] rounded-full flex flex-col items-center justify-center">
                     <span className="text-2xl font-bold text-[#e3d4de] leading-none">
-                    {formatDate(event.startDate)?.replace(',', '').slice(3, 6)}
+                      {formatDate(event.startDate)
+                        ?.replace(",", "")
+                        .slice(3, 6)}
                     </span>
                     <span className="text-lg font-semibold text-[#ebd4e3] uppercase leading-none">
                       {formatDate(event.startDate)?.slice(0, 3)}
@@ -271,11 +233,11 @@ const Events = () => {
             ))}
           </div>
 
-          {filteredEvents.length > eventsPerPage && (
+          {eventsData?.totalPages > 1 && (
             <div className="flex mt-10 justify-center items-center">
               <Pagination
                 currentPage={currentPage}
-                totalPages={Math.ceil(filteredEvents.length / eventsPerPage)}
+                totalPages={eventsData?.totalPages}
                 onPageChange={handlePageChange}
               />
             </div>
