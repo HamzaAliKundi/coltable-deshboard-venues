@@ -28,8 +28,8 @@ export const eventsApi = createApi({
     }),
 
     getAllEventsByVenues: builder.query({
-      query: ({ page, limit }) =>
-        `/api/venue/event/get-all-events?limit=${limit}&page=${page}&sort=-1`,
+      query: ({ page, limit, status }) =>
+        `/api/venue/event/get-all-events?limit=${limit}&page=${page}&status=${status}&sort=-1`,
     }),
 
     getEventsByVenuesById: builder.query({
