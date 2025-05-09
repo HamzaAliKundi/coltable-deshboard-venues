@@ -321,7 +321,7 @@ const CreateEvent = () => {
             </label>
             <input
               type="text"
-              placeholder="Event Location Name"
+              placeholder="Event Location"
               className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
               {...register("eventLocation", {
                 required: "Event location is required",

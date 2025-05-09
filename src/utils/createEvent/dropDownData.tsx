@@ -49,5 +49,5 @@ export const eventOptions = [
   { label: "Indoor Open Floor Of Venue - Carpet", value: "indoor_open_floor_carpet" },
   { label: "Outdoor Patio - Hardwood", value: "outdoor_patio_hardwood" },
   { label: "Outdoor - Grass", value: "outdoor_grass" },
-  { label: "Others (Type Here)", value: "others" },
+ 
 ];
