@@ -41,3 +41,13 @@ export const eventOptions = [
     { value: "yes", label: "Yes" },
     { value: "no", label: "No" },
   ];
+
+  export const outdoorCoveringOptions = [
+  { label: "Indoor Stage", value: "indoor_stage" },
+  { label: "Outdoor Stage", value: "outdoor_stage" },
+  { label: "Indoor Open Floor Of Venue - Hardwood/Concrete", value: "indoor_open_floor_hardwood" },
+  { label: "Indoor Open Floor Of Venue - Carpet", value: "indoor_open_floor_carpet" },
+  { label: "Outdoor Patio - Hardwood", value: "outdoor_patio_hardwood" },
+  { label: "Outdoor - Grass", value: "outdoor_grass" },
+ 
+];
