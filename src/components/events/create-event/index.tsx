@@ -25,7 +25,6 @@ import CustomSelect from "../../../utils/CustomSelect";
 type FormData = {
   eventName: string;
   eventHost: string;
-  eventLocation: string;
   eventType: string;
   soundEquipment?: string;
   outdoorCoverings?: string;
@@ -45,6 +44,8 @@ type FormData = {
   specialRequests?: string;
   logo: string;
   performersList: string[];
+  eventLocation: string;
+  eventDescription: string;
 };
 
 const CreateEvent = () => {
@@ -195,6 +196,7 @@ const CreateEvent = () => {
         ),
 
         eventLocation: getEventsByVenuesById.event.eventLocation || "",
+        eventDescription: getEventsByVenuesById.event.eventDescription || "",
       });
 
       if (getEventsByVenuesById?.event?.image) {
@@ -205,7 +207,6 @@ const CreateEvent = () => {
   }, [id, getEventsByVenuesById, reset]);
 
   const onSubmit = async (data: FormData) => {
-    
     const today = new Date().toISOString().split("T")[0];
 
     const transformedData = {
@@ -231,6 +232,7 @@ const CreateEvent = () => {
       image: logoUrl,
       eventCategory: data.eventCategory,
       eventLocation: data.eventLocation,
+      eventDescription: data.eventDescription,
     };
 
     try {
@@ -840,6 +842,23 @@ const CreateEvent = () => {
             className="w-full bg-[#0D0D0D] rounded-lg p-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
             {...register("specialRequests")}
           />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label className="text-white font-space-grotesk text-sm md:text-base">
+            Event Description*
+          </label>
+          <textarea
+            placeholder="Type..."
+            rows={6}
+            className="w-full bg-[#0D0D0D] rounded-lg p-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+            {...register("eventDescription", { required: "Field is required" })}
+          />
+          {errors.eventDescription && (
+            <span className="text-red-500 text-sm">
+              {errors.eventDescription.message}
+            </span>
+          )}
         </div>
 
         {/* Logo Upload */}
