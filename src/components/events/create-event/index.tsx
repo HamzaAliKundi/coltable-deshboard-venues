@@ -18,12 +18,14 @@ import {
   countOptions,
   callTimeOptions,
   dressingAreaOptions,
+  outdoorCoveringOptions,
 } from "../../../utils/createEvent/dropDownData";
 import CustomSelect from "../../../utils/CustomSelect";
 
 type FormData = {
   eventName: string;
   eventHost: string;
+  eventLocation: string;
   eventType: string;
   soundEquipment?: string;
   outdoorCoverings?: string;
@@ -189,8 +191,10 @@ const CreateEvent = () => {
         ),
         eventCategory: getEventsByVenuesById.event.eventCategory || "",
         performersList: getEventsByVenuesById.event.performersList.map(
-          (p) => p._id
+          (p: any) => p._id
         ),
+
+        eventLocation: getEventsByVenuesById.event.eventLocation || "",
       });
 
       if (getEventsByVenuesById?.event?.image) {
@@ -201,7 +205,7 @@ const CreateEvent = () => {
   }, [id, getEventsByVenuesById, reset]);
 
   const onSubmit = async (data: FormData) => {
-
+    
     const today = new Date().toISOString().split("T")[0];
 
     const transformedData = {
@@ -226,6 +230,7 @@ const CreateEvent = () => {
       assignedPerformers: data.performerNumbers,
       image: logoUrl,
       eventCategory: data.eventCategory,
+      eventLocation: data.eventLocation,
     };
 
     try {
@@ -281,7 +286,7 @@ const CreateEvent = () => {
             <input
               type="text"
               placeholder="Event Name"
-              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
               {...register("eventName", { required: "Event name is required" })}
             />
             {errors.eventName && (
@@ -297,7 +302,7 @@ const CreateEvent = () => {
             <input
               type="text"
               placeholder="Event Host Name"
-              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
               {...register("eventHost", { required: "Event host is required" })}
             />
             {errors.eventHost && (
@@ -309,34 +314,55 @@ const CreateEvent = () => {
         </div>
 
         {/* Event type dropdown */}
-        <div className="flex flex-col gap-2">
-          <label className="text-white font-space-grotesk text-sm md:text-base">
-            Event type*
-          </label>
-          <Controller
-            name="eventType"
-            control={control}
-            rules={{ required: "Event type is required" }}
-            render={({ field }) => (
-              <CustomSelect
-                {...field}
-                value={eventOptions.find(
-                  (option) => option.value === field.value
-                )}
-                onChange={(selectedOption: any) =>
-                  field.onChange(selectedOption?.value)
-                }
-                options={eventOptions}
-                isDisabled={false}
-                placeholder="Select event type"
-              />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
+            <label className="text-white font-space-grotesk text-sm md:text-base">
+              Event Location*
+            </label>
+            <input
+              type="text"
+              placeholder="Event Location Name"
+              className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+              {...register("eventLocation", {
+                required: "Event location is required",
+              })}
+            />
+            {errors.eventLocation && (
+              <span className="text-red-500 text-sm">
+                {errors.eventLocation.message}
+              </span>
             )}
-          />
-          {errors.eventType && (
-            <span className="text-red-500 text-sm">
-              {errors.eventType.message}
-            </span>
-          )}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-white font-space-grotesk text-sm md:text-base">
+              Event type*
+            </label>
+            <Controller
+              name="eventType"
+              control={control}
+              rules={{ required: "Event type is required" }}
+              render={({ field }) => (
+                <CustomSelect
+                  {...field}
+                  value={eventOptions.find(
+                    (option) => option.value === field.value
+                  )}
+                  onChange={(selectedOption: any) =>
+                    field.onChange(selectedOption?.value)
+                  }
+                  options={eventOptions}
+                  isDisabled={false}
+                  placeholder="Select event type"
+                />
+              )}
+            />
+            {errors.eventType && (
+              <span className="text-red-500 text-sm">
+                {errors.eventType.message}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Sound Equipment and Outdoor Venue Questions */}
@@ -348,7 +374,7 @@ const CreateEvent = () => {
             <input
               type="text"
               placeholder="Enter here"
-              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
               {...register("soundEquipment", {
                 required: "Equipment information is required",
               })}
@@ -359,18 +385,30 @@ const CreateEvent = () => {
               </span>
             )}
           </div>
-          <div className="flex flex-col gap-2">
+
+          <div className="flex flex-col gap-2 self-end">
             <label className="text-white font-space-grotesk text-sm md:text-base">
               If an Outdoor venue, are there awnings/coverings to account for
               inclement weather conditions?*
             </label>
-            <input
-              type="text"
-              placeholder="Ener here"
-              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
-              {...register("outdoorCoverings", {
-                required: "Outdoor information is required",
-              })}
+            <Controller
+              name="outdoorCoverings"
+              control={control}
+              rules={{ required: "Field is required" }}
+              render={({ field }) => (
+                <CustomSelect
+                  {...field}
+                  value={outdoorCoveringOptions.find(
+                    (option) => option.value === field.value
+                  )}
+                  onChange={(selectedOption) =>
+                    field.onChange(selectedOption?.value)
+                  }
+                  options={outdoorCoveringOptions}
+                  isDisabled={false}
+                  placeholder="Enter here"
+                />
+              )}
             />
             {errors.outdoorCoverings && (
               <span className="text-red-500 text-sm">
@@ -389,7 +427,7 @@ const CreateEvent = () => {
             <input
               type="text"
               placeholder="Event Category"
-              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
               {...register("eventCategory", {
                 required: "Event category information is required",
               })}
@@ -438,10 +476,10 @@ const CreateEvent = () => {
                     styles={{
                       control: (base) => ({
                         ...base,
-                        minHeight: "41px",
+                        minHeight: "50px",
                         background: "#0D0D0D",
                         border: "0px solid transparent",
-                        borderRadius: "6px",
+                        borderRadius: "8px",
                         boxShadow: "none",
                         "&:hover": {
                           border: "1px solid #383838",
@@ -609,7 +647,7 @@ const CreateEvent = () => {
           <div className="relative">
             <input
               type="date"
-              className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500"
               {...register("eventStartDate", {
                 required: "Start date is required",
               })}
@@ -627,30 +665,27 @@ const CreateEvent = () => {
         </div>
 
         {/* Hosts and Performers Count */}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Hosts Count */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 justify-end">
             <label className="text-white font-space-grotesk text-sm md:text-base">
               How many hosts/co-hosts?*
             </label>
-            <Controller
-              name="hostsCount"
-              control={control}
-              rules={{ required: "Host count is required" }}
-              render={({ field }) => (
-                <CustomSelect
-                  {...field}
-                  value={countOptions.find(
-                    (option) => option.value === field.value
-                  )}
-                  onChange={(selectedOption) =>
-                    field.onChange(selectedOption?.value)
-                  }
-                  options={countOptions}
-                  isDisabled={false}
-                  placeholder="Select"
-                />
-              )}
+            <input
+              type="number"
+              min="0"
+              onWheel={(e) => (e.target as HTMLInputElement).blur()}
+              placeholder="Event Host Count"
+              className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              {...register("hostsCount", {
+                required: "Host count is required",
+                min: {
+                  value: 0,
+                  message: "Negative numbers are not allowed",
+                },
+                valueAsNumber: true,
+              })}
             />
             {errors.hostsCount && (
               <span className="text-red-500 text-sm">
@@ -667,19 +702,19 @@ const CreateEvent = () => {
             <Controller
               name="performersCount"
               control={control}
-              rules={{ required: "Performers count is required" }}
+              rules={{
+                required: "Performers count is required",
+                min: { value: 0, message: "Negative numbers are not allowed" },
+              }}
               render={({ field }) => (
-                <CustomSelect
+                <input
+                  type="number"
+                  min="0"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                  placeholder="Performers Count"
+                  className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   {...field}
-                  value={countOptions.find(
-                    (option) => option.value === field.value
-                  )}
-                  onChange={(selectedOption) =>
-                    field.onChange(selectedOption?.value)
-                  }
-                  options={countOptions}
-                  isDisabled={false}
-                  placeholder="Select"
+                  value={field.value ?? ""}
                 />
               )}
             />
@@ -694,34 +729,20 @@ const CreateEvent = () => {
         {/* Equipment Responsibility */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Event Call Time */}
-          <div className="flex flex-col gap-2">
-            <label className="text-white font-space-grotesk text-sm md:text-base">
-              Event Call Time*
-            </label>
-            <Controller
-              name="callTime"
-              control={control}
-              rules={{ required: "Call time is required" }}
-              render={({ field }) => (
-                <CustomSelect
-                  {...field}
-                  value={callTimeOptions.find(
-                    (option: any) => option.value === field.value
-                  )}
-                  onChange={(selectedOption) =>
-                    field.onChange(selectedOption?.value)
-                  }
-                  options={callTimeOptions}
-                  isDisabled={false}
-                  placeholder="Select call time"
-                />
-              )}
-            />
-            {errors.callTime && (
-              <span className="text-red-500 text-sm">
-                {errors.callTime.message}
-              </span>
-            )}
+
+          <div className="flex flex-col gap-2 justify-end">
+            <label className={labelClass}>Event Call Time*</label>
+
+            <div className="relative">
+              <input
+                type="time"
+                className={`${inputClass} text-white`}
+                {...register("callTime", { required: true })}
+              />
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <Clock color="white" size={20} />
+              </div>
+            </div>
           </div>
 
           {/* Performer Numbers */}
@@ -732,19 +753,19 @@ const CreateEvent = () => {
             <Controller
               name="performerNumbers"
               control={control}
-              rules={{ required: "This field is required" }}
+              rules={{
+                required: "This field is required",
+                min: { value: 0, message: "Negative numbers are not allowed" },
+              }}
               render={({ field }) => (
-                <CustomSelect
+                <input
+                  type="number"
+                  min="0"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                  placeholder="Enter Number"
+                  className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   {...field}
-                  value={countOptions.find(
-                    (option) => option.value === field.value
-                  )}
-                  onChange={(selectedOption) =>
-                    field.onChange(selectedOption?.value)
-                  }
-                  options={countOptions}
-                  isDisabled={false}
-                  placeholder="Select"
+                  value={field.value ?? ""}
                 />
               )}
             />
@@ -794,21 +815,12 @@ const CreateEvent = () => {
               What format will the performer need to provide the music/and
               needed by date/time?*
             </label>
-            <div className="relative">
-              <input
-                type="datetime-local"
-                defaultValue={new Date(Date.now() + 24 * 60 * 60 * 1000)
-                  .toISOString()
-                  .slice(0, 16)}
-                className="w-full h-10 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base focus:outline-none focus:ring-1 focus:ring-pink-500"
-                {...register("musicDeadline", {
-                  required: "Deadline is required",
-                })}
-              />
-              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                <Calendar color="white" size={20} />
-              </div>
-            </div>
+            <input
+              type="text"
+              placeholder="Enter here"
+              className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+              {...register("musicDeadline", { required: "Field is required" })}
+            />
             {errors.musicDeadline && (
               <span className="text-red-500 text-sm">
                 {errors.musicDeadline.message}
