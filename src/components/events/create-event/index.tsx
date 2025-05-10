@@ -46,6 +46,11 @@ type FormData = {
   performersList: string[];
   eventLocation: string;
   eventDescription: string;
+  performerBudget: string;
+  hostBudget: string;
+  otherStaffBudget: string;
+  totalEventBudget: string;
+  isPrivate: string | boolean;
 };
 
 const CreateEvent = () => {
@@ -70,9 +75,14 @@ const CreateEvent = () => {
     register,
     handleSubmit,
     reset,
+    watch,
     control,
     formState: { errors },
-  } = useForm<FormData>();
+  } = useForm<FormData>({
+    defaultValues: {
+      isPrivate: false,
+    },
+  });
 
   const handleLogoUpload = async () => {
     const input = document.createElement("input");
@@ -165,6 +175,12 @@ const CreateEvent = () => {
               .slice(0, 5)
           : undefined,
 
+        callTime: getEventsByVenuesById.event.eventCallTime
+          ? new Date(getEventsByVenuesById.event.eventCallTime)
+              .toTimeString()
+              .slice(0, 5)
+          : undefined,
+
         eventStartDate: getEventsByVenuesById?.event?.startDate
           ? new Date(getEventsByVenuesById.event.startDate)
               .toISOString()
@@ -181,7 +197,6 @@ const CreateEvent = () => {
         hostsCount: String(getEventsByVenuesById.event.hosts || ""),
         performersCount: String(getEventsByVenuesById.event.performers || ""),
 
-        callTime: getEventsByVenuesById.event.eventCallTime || "",
         dressingArea: getEventsByVenuesById.event.hasPrivateDressingArea || "",
         specialRequests: getEventsByVenuesById.event.specialRequirements || "",
         outdoorCoverings: getEventsByVenuesById.event.hasCoverings || "",
@@ -195,8 +210,13 @@ const CreateEvent = () => {
           (p: any) => p._id
         ),
 
-        eventLocation: getEventsByVenuesById.event.eventLocation || "",
-        eventDescription: getEventsByVenuesById.event.eventDescription || "",
+        eventLocation: getEventsByVenuesById.event.address || "",
+        eventDescription: getEventsByVenuesById.event.description || "",
+        totalEventBudget: getEventsByVenuesById.event.totalEventBudget || "",
+        otherStaffBudget: getEventsByVenuesById.event.otherStaffBudget || "",
+        hostBudget: getEventsByVenuesById.event.hostBudget || "",
+        performerBudget: getEventsByVenuesById.event.performerBudget || "",
+        isPrivate: getEventsByVenuesById.event.isPrivate ? "true" : "false",
       });
 
       if (getEventsByVenuesById?.event?.image) {
@@ -212,6 +232,7 @@ const CreateEvent = () => {
     const transformedData = {
       startTime: new Date(`${today}T${data.startTime}`),
       endTime: new Date(`${today}T${data.endTime}`),
+      eventCallTime: new Date(`${today}T${data.callTime}`),
 
       type: data.eventType,
       title: data.eventName,
@@ -219,7 +240,6 @@ const CreateEvent = () => {
       specialRequirements: data.specialRequests,
       audienceType: data.audienceType,
       hosts: data.hostsCount,
-      eventCallTime: data.callTime,
       hasCoverings: data.outdoorCoverings,
       hasPrivateDressingArea: data.dressingArea,
       isEquipmentProvidedByVenue: data.soundEquipment,
@@ -231,8 +251,13 @@ const CreateEvent = () => {
       assignedPerformers: data.performerNumbers,
       image: logoUrl,
       eventCategory: data.eventCategory,
-      eventLocation: data.eventLocation,
-      eventDescription: data.eventDescription,
+      address: data.eventLocation,
+      description: data.eventDescription,
+      performerBudget: data.performerBudget,
+      hostBudget: data.hostBudget,
+      otherStaffBudget: data.otherStaffBudget,
+      totalEventBudget: data.totalEventBudget,
+      isPrivate: data.isPrivate,
     };
 
     try {
@@ -420,128 +445,24 @@ const CreateEvent = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Event Type and Theme */}
-          <div className="flex flex-col gap-2">
-            <label className="text-white font-space-grotesk text-sm md:text-base">
-              Event Category*
-            </label>
-            <input
-              type="text"
-              placeholder="Event Category"
-              className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
-              {...register("eventCategory", {
-                required: "Event category information is required",
-              })}
-            />
-            {errors.eventCategory && (
-              <span className="text-red-500 text-sm">
-                {errors.eventCategory.message}
-              </span>
-            )}
-          </div>
-
-          {/* Performers List */}
-          <div className="mt-1">
-            <label className={labelClass}>Top Drag Performers*</label>
-            <Controller
-              name="performersList"
-              control={control}
-              defaultValue={[]}
-              rules={{ required: true }}
-              render={({ field }) => {
-                const selectedOptions =
-                  performersData
-                    ?.filter((performer: any) =>
-                      field.value?.includes(performer._id)
-                    )
-                    ?.map((performer: any) => ({
-                      value: performer._id,
-                      label: performer.fullDragName || "Unnamed Performer",
-                    })) || [];
-
-                return (
-                  <Select
-                    value={selectedOptions}
-                    onChange={(options) => {
-                      const selectedIds =
-                        options?.map((option) => option.value) || [];
-                      field.onChange(selectedIds);
-                    }}
-                    isMulti
-                    closeMenuOnSelect={false}
-                    options={performersData?.map((performer: any) => ({
-                      value: performer._id,
-                      label: performer.fullDragName || "Unnamed Performer",
-                    }))}
-                    className="w-full"
-                    styles={{
-                      control: (base) => ({
-                        ...base,
-                        minHeight: "50px",
-                        background: "#0D0D0D",
-                        border: "0px solid transparent",
-                        borderRadius: "8px",
-                        boxShadow: "none",
-                        "&:hover": {
-                          border: "1px solid #383838",
-                        },
-                      }),
-                      menu: (base) => ({
-                        ...base,
-                        background: "#1D1D1D",
-                        border: "1px solid #383838",
-                        borderRadius: "4px",
-                      }),
-                      option: (base, state) => ({
-                        ...base,
-                        background: state.isFocused ? "#383838" : "#1D1D1D",
-                        color: "#fff",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        "&::before": {
-                          content: '""',
-                          display: "block",
-                          width: "16px",
-                          height: "16px",
-                          border: "2px solid #fff",
-                          borderRadius: "50%",
-                          backgroundColor: state.isSelected
-                            ? "#FF00A2"
-                            : "transparent",
-                        },
-                      }),
-                      multiValue: (base) => ({
-                        ...base,
-                        background: "#383838",
-                        borderRadius: "4px",
-                      }),
-                      multiValueLabel: (base) => ({
-                        ...base,
-                        color: "#fff",
-                      }),
-                      multiValueRemove: (base) => ({
-                        ...base,
-                        color: "#fff",
-                        ":hover": {
-                          background: "#4a4a4a",
-                          borderRadius: "0 4px 4px 0",
-                        },
-                      }),
-                      input: (base) => ({
-                        ...base,
-                        color: "#fff",
-                      }),
-                    }}
-                    placeholder="Select top drag performers"
-                    noOptionsMessage={() => "No performers available"}
-                  />
-                );
-              }}
-            />
-          </div>
+        {/* Event Type and Theme */}
+        <div className="flex flex-col gap-2">
+          <label className="text-white font-space-grotesk text-sm md:text-base">
+            Event Category*
+          </label>
+          <input
+            type="text"
+            placeholder="Event Category"
+            className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+            {...register("eventCategory", {
+              required: "Event category information is required",
+            })}
+          />
+          {errors.eventCategory && (
+            <span className="text-red-500 text-sm">
+              {errors.eventCategory.message}
+            </span>
+          )}
         </div>
 
         {/* Equipment Responsibility */}
@@ -895,6 +816,218 @@ const CreateEvent = () => {
                 </div>
               </>
             )}
+          </div>
+        </div>
+
+        {/* Book Performer */}
+        <div>
+          <div className="w-[100px] my-3 h-[4px] rounded-lg bg-[#FF00A2]"></div>
+          <h1 className="text-white text-3xl font-space-grotesk mb-8">
+            Book Performer
+          </h1>
+          <div className="flex flex-col gap-4">
+            {/* Performers List */}
+            <div>
+              <label className={labelClass}>Select Performer*</label>
+              <Controller
+                name="performersList"
+                control={control}
+                defaultValue={[]}
+                rules={{ required: true }}
+                render={({ field }) => {
+                  const selectedOptions =
+                    performersData
+                      ?.filter((performer: any) =>
+                        field.value?.includes(performer._id)
+                      )
+                      ?.map((performer: any) => ({
+                        value: performer._id,
+                        label: performer.fullDragName || "Unnamed Performer",
+                      })) || [];
+
+                  return (
+                    <Select
+                      value={selectedOptions}
+                      onChange={(options) => {
+                        const selectedIds =
+                          options?.map((option) => option.value) || [];
+                        field.onChange(selectedIds);
+                      }}
+                      isMulti
+                      closeMenuOnSelect={false}
+                      options={performersData?.map((performer: any) => ({
+                        value: performer._id,
+                        label: performer.fullDragName || "Unnamed Performer",
+                      }))}
+                      className="w-full"
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          minHeight: "50px",
+                          background: "#0D0D0D",
+                          border: "0px solid transparent",
+                          borderRadius: "8px",
+                          boxShadow: "none",
+                          "&:hover": {
+                            border: "1px solid #383838",
+                          },
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          background: "#1D1D1D",
+                          border: "1px solid #383838",
+                          borderRadius: "4px",
+                        }),
+                        option: (base, state) => ({
+                          ...base,
+                          background: state.isFocused ? "#383838" : "#1D1D1D",
+                          color: "#fff",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          "&::before": {
+                            content: '""',
+                            display: "block",
+                            width: "16px",
+                            height: "16px",
+                            border: "2px solid #fff",
+                            borderRadius: "50%",
+                            backgroundColor: state.isSelected
+                              ? "#FF00A2"
+                              : "transparent",
+                          },
+                        }),
+                        multiValue: (base) => ({
+                          ...base,
+                          background: "#383838",
+                          borderRadius: "4px",
+                        }),
+                        multiValueLabel: (base) => ({
+                          ...base,
+                          color: "#fff",
+                        }),
+                        multiValueRemove: (base) => ({
+                          ...base,
+                          color: "#fff",
+                          ":hover": {
+                            background: "#4a4a4a",
+                            borderRadius: "0 4px 4px 0",
+                          },
+                        }),
+                        input: (base) => ({
+                          ...base,
+                          color: "#fff",
+                        }),
+                      }}
+                      placeholder="Performers name"
+                      noOptionsMessage={() => "No performers available"}
+                    />
+                  );
+                }}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-white font-space-grotesk text-sm md:text-base">
+                  Host Budget*
+                </label>
+                <input
+                  type="text"
+                  placeholder="Amount"
+                  className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+                  {...register("hostBudget", {
+                    required: "Host Budget is required",
+                  })}
+                />
+                {errors.hostBudget && (
+                  <span className="text-red-500 text-sm">
+                    {errors.hostBudget.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-white font-space-grotesk text-sm md:text-base">
+                  Performer Budget*
+                </label>
+                <input
+                  type="text"
+                  placeholder="Amount"
+                  className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+                  {...register("performerBudget", {
+                    required: "Performer Budget is required",
+                  })}
+                />
+                {errors.performerBudget && (
+                  <span className="text-red-500 text-sm">
+                    {errors.performerBudget.message}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-white font-space-grotesk text-sm md:text-base">
+                  Other staff budget, if any
+                </label>
+                <input
+                  type="text"
+                  placeholder="Amount"
+                  className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+                  {...register("otherStaffBudget")}
+                />
+                {errors.otherStaffBudget && (
+                  <span className="text-red-500 text-sm">
+                    {errors.otherStaffBudget.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-white font-space-grotesk text-sm md:text-base">
+                  Total Event Budget*
+                </label>
+                <input
+                  type="text"
+                  placeholder="Amount"
+                  className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
+                  {...register("totalEventBudget")}
+                />
+                {errors.totalEventBudget && (
+                  <span className="text-red-500 text-sm">
+                    {errors.totalEventBudget.message}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  {...register("isPrivate")}
+                  value="false"
+                  className="w-5 h-5 text-[#FF00A2] focus:ring-[#FF00A2]"
+                />
+                <span className="text-white font-space-grotesk text-sm md:text-base">
+                  Public Event
+                </span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  {...register("isPrivate")}
+                  value="true"
+                  className="w-5 h-5 text-[#FF00A2] focus:ring-[#FF00A2]"
+                />
+                <span className="text-white font-space-grotesk text-sm md:text-base">
+                  Private Event
+                </span>
+              </label>
+            </div>
           </div>
         </div>
 
