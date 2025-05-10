@@ -227,8 +227,6 @@ const CreateEvent = () => {
   }, [id, getEventsByVenuesById, reset]);
 
   const onSubmit = async (data: FormData) => {
-    console.log("objectt", data);
-
     const today = new Date().toISOString().split("T")[0];
 
     const transformedData = {

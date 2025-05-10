@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useGetEventsByVenuesByIdQuery } from "../../../apis/events";
-import { callTimeOptions } from "../../../utils/createEvent/dropDownData";
+import { outdoorCoveringOptions } from "../../../utils/createEvent/dropDownData";
 
 const EventPreview = () => {
   const { id } = useParams();
@@ -45,6 +45,12 @@ const EventPreview = () => {
     };
     return types[type] || type;
   };
+
+  const selectedCovering = getEventsByVenuesById?.event?.hasCoverings;
+
+  const selectedLabel = outdoorCoveringOptions.find(
+    (option) => option.value === selectedCovering
+  )?.label;
 
   if (getEventLoading) {
     return (
@@ -126,15 +132,12 @@ const EventPreview = () => {
             </li>
             <li>
               <span className="font-medium">Call Time:</span>{" "}
-              {callTimeOptions.find(
-                (opt) =>
-                  opt.value === getEventsByVenuesById?.event?.eventCallTime
-              )?.label || "Not specified"}
+              {extractTime(getEventsByVenuesById?.event.eventCallTime)}
             </li>
 
             <li>
               <span className="font-medium">Music Deadline:</span>{" "}
-              {formatDate(getEventsByVenuesById?.event?.musicFormat)}
+              {getEventsByVenuesById?.event?.musicFormat}
             </li>
           </ul>
         </div>
@@ -171,8 +174,8 @@ const EventPreview = () => {
               <span className="font-medium">Equipment Responsibility:</span>{" "}
               {getEventsByVenuesById?.event?.isEquipmentProvidedByPerformer ===
               "yes"
-                ? "Performer provides equipment"
-                : "Venue provides equipment"}
+                ? "Yes"
+                : "No"}
             </p>
           </div>
         </div>
@@ -203,9 +206,7 @@ const EventPreview = () => {
           <h3 className="text-white border-b-[3px] border-[#FF00A2] mb-3 pb-1 text-lg">
             Special Requests
           </h3>
-          <p className="text-white/90">
-            {getEventsByVenuesById?.event?.specialRequirements}
-          </p>
+          <p className="text-white/90">{selectedLabel || "N/A"}</p>
         </div>
       )}
 

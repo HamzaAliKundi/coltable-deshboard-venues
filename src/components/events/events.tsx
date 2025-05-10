@@ -192,7 +192,7 @@ const Events = () => {
                         className="w-4 h-4"
                       />
                       <p className="font-['Space_Grotesk'] font-normal text-sm leading-none text-white">
-                        {event.location || "N/A"}
+                        {event.address || "N/A"}
                       </p>
                     </div>
                   </div>
