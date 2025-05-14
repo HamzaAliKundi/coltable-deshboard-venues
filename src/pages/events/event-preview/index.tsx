@@ -177,6 +177,14 @@ const EventPreview = () => {
                 ? "Yes"
                 : "No"}
             </p>
+
+            <p>
+              <span className="font-medium">Performers:</span>{" "}
+              {getEventsByVenuesById?.event?.performersList
+                ?.filter((performer: any) => performer?.fullDragName)
+                .map((performer: any) => performer.fullDragName)
+                .join(", ")}
+            </p>
           </div>
         </div>
       </div>
@@ -193,20 +201,55 @@ const EventPreview = () => {
               {getEventsByVenuesById?.event?.isEquipmentProvidedByVenue}
             </p>
             <p>
-              <span className="font-medium">Outdoor Coverings:</span>{" "}
-              {getEventsByVenuesById?.event?.hasCoverings}
+              <span className="font-medium">Stage:</span> {selectedLabel}
             </p>
           </div>
         </div>
       </div>
 
       {/* Special Requests */}
-      {getEventsByVenuesById?.event?.specialRequirements && (
+      {getEventsByVenuesById?.event?.description && (
         <div className="mt-8">
           <h3 className="text-white border-b-[3px] border-[#FF00A2] mb-3 pb-1 text-lg">
-            Special Requests
+            Description & Special Request
           </h3>
-          <p className="text-white/90">{selectedLabel || "N/A"}</p>
+          <p className="text-white/90">
+            <span className="font-medium">Description:</span>{" "}
+            {getEventsByVenuesById?.event?.description || "N/A"}
+          </p>
+          <p className="text-white/90">
+            <span className="font-medium">Special Request For Performer:</span>{" "}
+            {getEventsByVenuesById?.event?.specialRequirements || "N/A"}
+          </p>
+        </div>
+      )}
+
+      {getEventsByVenuesById?.event?.specialRequirements && (
+        <div className="mt-8">
+          <div>
+            <h3 className="text-white border-b-[3px] border-[#FF00A2] mb-3 pb-1 text-lg">
+              Budget
+            </h3>
+            <ul className="text-white/90 space-y-2">
+              <li>
+                <span className="font-medium">Host Budget:</span>{" "}
+                {getEventsByVenuesById?.event?.hostBudget || "N/A"}
+              </li>
+              <li>
+                <span className="font-medium">Performer Budget:</span>{" "}
+                {getEventsByVenuesById?.event?.performerBudget || "N/A"}
+              </li>
+              <li>
+                <span className="font-medium">Other Staff Budget:</span>{" "}
+                {getEventsByVenuesById?.event?.otherStaffBudget || "N/A"}
+              </li>
+
+              <li>
+                <span className="font-medium">Total Event Budget:</span>{" "}
+                {getEventsByVenuesById?.event?.totalEventBudget || "N/A"}
+              </li>
+            </ul>
+          </div>
         </div>
       )}
 

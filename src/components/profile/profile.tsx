@@ -35,9 +35,9 @@ const Profile = () => {
   );
 
   const venueOptions = [
-    { value: "Bar/Club", label: "Bar/Club" },
-    { value: "Restaurants/Dining", label: "Restaurants/Dining" },
-    { value: "Other", label: "Other" },
+    { value: "bar/club", label: "Bar/Club" },
+    { value: "restaurants/dining", label: "Restaurants/Dining" },
+    { value: "other", label: "Other" },
   ];
 
   const [updateProfile, { isLoading: isUpdating }] =
