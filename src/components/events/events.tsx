@@ -144,7 +144,7 @@ const Events = () => {
               >
                 <div className="p-2 relative">
                   <img
-                    src="/events/eventt.png"
+                    src={event?.image}
                     alt="Event"
                     className="w-full h-[220px] rounded-[8px] object-cover"
                   />
