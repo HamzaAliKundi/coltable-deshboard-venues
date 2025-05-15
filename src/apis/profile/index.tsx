@@ -28,6 +28,13 @@ export const profileApi = createApi({
         body: eventData,
       }),
     }),
+    changePassword: builder.mutation({
+      query: (data: { newPassword: string }) => ({
+        url: "/auth/user/change-password",
+        method: "PATCH",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -35,4 +42,5 @@ export const {
   useGetPerformerProfileQuery,
   useUpdatePerformerProfileMutation,
   useAddEventMutation,
+  useChangePasswordMutation
 } = profileApi;
