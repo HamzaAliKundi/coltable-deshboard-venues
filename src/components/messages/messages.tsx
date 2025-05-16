@@ -53,7 +53,7 @@ const Messages = () => {
       <div className="p-4 md:px-8 py-8 md:py-16 bg-black">
         <ChatBox
           chatId={chat._id}
-          recipientName={chat.participant.name}
+          recipientName={chat.participant.fullDragName}
           recipientImage={chat.participant.profilePhoto}
           onBack={() => setSelectedChat(null)}
           sender={venueProfile?.user}
@@ -70,7 +70,7 @@ const Messages = () => {
         {data.chats.map((chat: Chat) => (
           <MessageCard
             key={chat._id}
-            senderName={chat.participant.name}
+            senderName={chat.participant.fullDragName}
             lastMessage={chat.latestMessage}
             image={chat.participant.profilePhoto}
             onClick={() => setSelectedChat(chat._id)}
