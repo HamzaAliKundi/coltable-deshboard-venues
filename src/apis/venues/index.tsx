@@ -14,6 +14,9 @@ export const venuesApi = createApi({
     getSingleVenueById: builder.query({
       query: (id) => `/auth/user/get-profile/${id}`,
     }),
+    getVenueProfile: builder.query({
+      query: (id) => `/auth/user/get-profile`,
+    }),
     updateVenueProfile: builder.mutation({
       query: ({ data }: { data: any }) => ({
         url: `auth/user/update-profile`,
@@ -24,5 +27,5 @@ export const venuesApi = createApi({
   }),
 });
 
-export const { useGetSingleVenueByIdQuery, useUpdateVenueProfileMutation } =
+export const { useGetSingleVenueByIdQuery, useUpdateVenueProfileMutation, useGetVenueProfileQuery } =
   venuesApi;

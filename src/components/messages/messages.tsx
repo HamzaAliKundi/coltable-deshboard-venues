@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ChatBox from './ChatBox';
 import MessageCard from './MessageCard';
 import { useGetAllChatsQuery } from '../../apis/messages';
+import { useGetVenueProfileQuery } from '../../apis/venues';
 
 interface Participant {
   _id: string;
@@ -23,15 +24,16 @@ interface Chat {
 
 const Messages = () => {
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
-  const { data, isLoading, error } = useGetAllChatsQuery();
+  const { data, isLoading: isLoadingChats, error: chatsError } = useGetAllChatsQuery({});
+  const { data: venueProfile, isLoading: isLoadingProfile } = useGetVenueProfileQuery({});
 
-  if (isLoading) return (
+  if (isLoadingChats || isLoadingProfile) return (
     <div className="flex justify-center items-center h-64">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF00A2]"></div>
     </div>
   );
 
-  if (error) return (
+  if (chatsError) return (
     <div className="text-center text-white py-8">
       Failed to load messages
     </div>
@@ -44,13 +46,19 @@ const Messages = () => {
   );
 
   if (selectedChat) {
-    const chat = data.chats.find(c => c._id === selectedChat);
+    const chat = data.chats.find((c: Chat) => c._id === selectedChat);
+    if (!chat) return null;
+    
     return (
       <div className="p-4 md:px-8 py-8 md:py-16 bg-black">
         <ChatBox
-          recipientName={chat?.participant.name || ''}
-          recipientImage={chat?.participant.profilePhoto}
+          chatId={chat._id}
+          recipientName={chat.participant.name}
+          recipientImage={chat.participant.profilePhoto}
           onBack={() => setSelectedChat(null)}
+          sender={venueProfile?.user}
+          eventId={chat.event}
+          recipientId={chat.participant._id}
         />
       </div>
     );
@@ -59,7 +67,7 @@ const Messages = () => {
   return (
     <div className="p-4 md:px-8 py-8 md:py-16 bg-black">
       <div className="space-y-4">
-        {data.chats.map(chat => (
+        {data.chats.map((chat: Chat) => (
           <MessageCard
             key={chat._id}
             senderName={chat.participant.name}
