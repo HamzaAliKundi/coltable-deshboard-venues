@@ -3,6 +3,7 @@ import ChatBox from './ChatBox';
 import MessageCard from './MessageCard';
 import { useGetAllChatsQuery } from '../../apis/messages';
 import { useGetVenueProfileQuery } from '../../apis/venues';
+import { useNavigate } from 'react-router-dom';
 
 interface Participant {
   _id: string;
@@ -24,8 +25,22 @@ interface Chat {
 
 const Messages = () => {
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
-  const { data, isLoading: isLoadingChats, error: chatsError } = useGetAllChatsQuery({});
-  const { data: venueProfile, isLoading: isLoadingProfile } = useGetVenueProfileQuery({});
+  const [isRefetching, setIsRefetching] = useState(false);
+  const { data, isLoading: isLoadingChats, error: chatsError, refetch: refetchChats } = useGetAllChatsQuery({});
+  const { data: venueProfile, isLoading: isLoadingProfile, refetch: refetchProfile } = useGetVenueProfileQuery({});
+
+  const navigate = useNavigate();
+
+  const handleBack = async () => {
+    setIsRefetching(true);
+    try {
+      await Promise.all([refetchChats(), refetchProfile()]);
+      setSelectedChat(null);
+      navigate('/messages', { replace: true });
+    } finally {
+      setIsRefetching(false);
+    }
+  };
 
   if (isLoadingChats || isLoadingProfile) return (
     <div className="flex justify-center items-center h-64">
@@ -55,7 +70,7 @@ const Messages = () => {
           chatId={chat._id}
           recipientName={chat.participant.fullDragName}
           recipientImage={chat.participant.profilePhoto}
-          onBack={() => setSelectedChat(null)}
+          onBack={handleBack}
           sender={venueProfile?.user}
           eventId={chat.event}
           recipientId={chat.participant._id}
