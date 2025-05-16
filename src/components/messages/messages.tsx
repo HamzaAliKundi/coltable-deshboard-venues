@@ -54,7 +54,7 @@ const Messages = () => {
         <ChatBox
           chatId={chat._id}
           recipientName={chat.participant.name}
-          recipientImage={chat.participant.logo}
+          recipientImage={chat.participant.profilePhoto}
           onBack={() => setSelectedChat(null)}
           sender={venueProfile?.user}
           eventId={chat.event}
@@ -72,7 +72,7 @@ const Messages = () => {
             key={chat._id}
             senderName={chat.participant.name}
             lastMessage={chat.latestMessage}
-            image={chat.participant.logo}
+            image={chat.participant.profilePhoto}
             onClick={() => setSelectedChat(chat._id)}
             isSelected={selectedChat === chat._id}
           />
