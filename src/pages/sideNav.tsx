@@ -63,21 +63,20 @@ const SideNav = ({ isSidebarOpen, toggleSidebar }: SideNavProps) => {
                 </NavLink>
               </li>
             ))}
-            {isSidebarOpen && (
-              <li className="mt-8">
-                <button
-                  onClick={() => setIsLogoutModalOpen(true)}
-                  className="px-4 py-2 font-['Space_Grotesk'] text-[16px] leading-[100%] align-middle text-[#888888] flex items-center gap-2"
-                >
-                  <img
-                    src="/login.svg"
-                    alt="Logout"
-                    className="w-[19px] h-[20px]"
-                  />
-                  Logout
-                </button>
-              </li>
-            )}
+            {/* Show logout button only on mobile screens */}
+            <li className="mt-8 md:hidden">
+              <button
+                onClick={() => setIsLogoutModalOpen(true)}
+                className="px-4 py-2 font-['Space_Grotesk'] text-[16px] leading-[100%] align-middle text-[#888888] flex items-center gap-2"
+              >
+                <img
+                  src="/login.svg"
+                  alt="Logout"
+                  className="w-[19px] h-[20px]"
+                />
+                Logout
+              </button>
+            </li>
           </ul>
         </nav>
       </aside>

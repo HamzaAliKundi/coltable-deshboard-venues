@@ -35,16 +35,14 @@ export default function Navbar({ isSidebarOpen, toggleSidebar }: NavbarProps) {
 
         {/* Right Section */}
         <div className="flex items-center gap-4">
-          {/* Logout Button - Hide on mobile and when sidebar is open */}
-          {!isSidebarOpen && (
-            <button
-              onClick={() => setIsLogoutModalOpen(true)}
-              className="hidden md:flex items-center gap-2 text-[#888888] hover:text-white transition-colors"
-            >
-              <img src="/login.svg" alt="Logout" className="w-[19px] h-[20px]" />
-              <span className="font-['Space_Grotesk'] text-[16px]">Logout</span>
-            </button>
-          )}
+          {/* Logout Button - Show only on larger screens */}
+          <button
+            onClick={() => setIsLogoutModalOpen(true)}
+            className="hidden md:flex items-center gap-2 text-[#888888] hover:text-white transition-colors"
+          >
+            <img src="/login.svg" alt="Logout" className="w-[19px] h-[20px]" />
+            <span className="font-['Space_Grotesk'] text-[16px]">Logout</span>
+          </button>
 
           {/* Mobile Menu Button */}
           <button onClick={toggleSidebar} className="md:hidden">
