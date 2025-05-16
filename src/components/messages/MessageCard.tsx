@@ -52,7 +52,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
           <div className="hidden md:block w-[2px] h-16 bg-white/50 mx-4"></div>
           <div className="text-white w-full md:w-1/2 md:pl-4">
             <p className="font-['Space_Grotesk'] font-normal text-[16px] md:text-[18px] leading-[100%] tracking-[0%] align-middle capitalize text-[#D2D2D2] text-center md:text-left">
-            {lastMessage?.length > 30 ? `${lastMessage?.slice(0,30)}...` : lastMessage}
+            {lastMessage?.length > 15 ? `${lastMessage?.slice(0,15)}...` : lastMessage}
             </p>
           </div>
           <div className="hidden md:block w-[2px] h-16 bg-white/50 mx-4"></div>
