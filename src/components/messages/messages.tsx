@@ -48,6 +48,12 @@ const Messages = () => {
     </div>
   );
 
+  if (isRefetching) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF00A2]"></div>
+    </div>
+  );
+
   if (chatsError) return (
     <div className="text-center text-white py-8">
       Failed to load messages
@@ -71,6 +77,7 @@ const Messages = () => {
           recipientName={chat.participant.fullDragName}
           recipientImage={chat.participant.profilePhoto}
           onBack={handleBack}
+          eventName={chat.eventName}
           sender={venueProfile?.user}
           eventId={chat.event}
           recipientId={chat.participant._id}
@@ -87,6 +94,7 @@ const Messages = () => {
             key={chat._id}
             senderName={chat.participant.fullDragName}
             lastMessage={chat.latestMessage}
+            eventName={chat.eventName}
             image={chat.participant.profilePhoto}
             onClick={() => setSelectedChat(chat._id)}
             isSelected={selectedChat === chat._id}

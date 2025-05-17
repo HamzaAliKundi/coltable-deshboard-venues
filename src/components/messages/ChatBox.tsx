@@ -25,6 +25,7 @@ interface ChatBoxProps {
   eventId?: string;
   recipientId?: string;
   sender?: any;
+  eventName?: string;
 }
 
 const ChatBox = ({ 
@@ -35,7 +36,8 @@ const ChatBox = ({
   isNewChat = false,
   eventId,
   recipientId,
-  sender
+  sender,
+  eventName
 }: ChatBoxProps) => {
   const [message, setMessage] = useState('');
   const [socket, setSocket] = useState<any>(null);
@@ -123,6 +125,7 @@ const ChatBox = ({
     newSocket.on('new-message', (message: Message) => {
       console.log('Received new message:', message);
       setMessages(prev => [...prev, message]);
+      if (sender?._id && chatId) newSocket.emit('mark-as-read', { chatId, userId: sender._id });
     });
 
     // Listen for venue responses
@@ -219,7 +222,7 @@ const ChatBox = ({
                 <div className="w-full h-full bg-[#383838]" />
               )}
             </div>
-            <span className="ml-3 text-white font-['Space_Grotesk'] text-lg">{recipientName}</span>
+            <span className="ml-3 text-white font-['Space_Grotesk'] text-lg">{recipientName} {eventName ? `- ${eventName}` : ""}</span>
           </div>
         </div>
       </div>
