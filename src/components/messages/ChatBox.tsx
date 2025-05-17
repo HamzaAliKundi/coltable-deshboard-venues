@@ -104,6 +104,14 @@ const ChatBox = ({
     if (!isNewChat && chatId) {
       console.log('Joining chat room:', chatId);
       newSocket.emit('join', chatId);
+
+      // Emit mark-as-read event
+      if (sender?._id && chatId) {
+        newSocket.emit('mark-as-read', {
+          chatId,
+          userId: sender._id
+        });
+      }
     }
 
     // Listen for join confirmation
