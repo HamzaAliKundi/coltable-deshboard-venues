@@ -84,6 +84,10 @@ const CreateEvent = () => {
     },
   });
 
+  const startTime = watch("startTime");
+  const endTime = watch("endTime");
+  const callTime = watch("callTime");
+
   const handleLogoUpload = async () => {
     const input = document.createElement("input");
     input.type = "file";
@@ -216,7 +220,7 @@ const CreateEvent = () => {
         otherStaffBudget: getEventsByVenuesById.event.otherStaffBudget || "",
         hostBudget: getEventsByVenuesById.event.hostBudget || "",
         performerBudget: getEventsByVenuesById.event.performerBudget || "",
-        isPrivate: getEventsByVenuesById.event.isPrivate ? "true" : "false",
+        // isPrivate: getEventsByVenuesById.event.isPrivate ? "true" : "false",
       });
 
       if (getEventsByVenuesById?.event?.image) {
@@ -257,7 +261,7 @@ const CreateEvent = () => {
       hostBudget: data.hostBudget,
       otherStaffBudget: data.otherStaffBudget,
       totalEventBudget: data.totalEventBudget,
-      isPrivate: data.isPrivate,
+      // isPrivate: data.isPrivate,
     };
 
     try {
@@ -533,33 +537,67 @@ const CreateEvent = () => {
 
         {/* Event Times */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
+          <div className="flex flex-col gap-2">
             <label className={labelClass}>Event Start Time*</label>
 
             <div className="relative">
               <input
                 type="time"
                 className={`${inputClass} text-white `}
-                {...register("startTime", { required: true })}
+                {...register("startTime", {
+                  required: "Start time is required",
+                  validate: (value) => {
+                    if (callTime && value < callTime) {
+                      return "Start time cannot be before call time";
+                    }
+                    if (endTime && value > endTime) {
+                      return "Start time cannot be after end time";
+                    }
+                    return true;
+                  },
+                })}
               />
+
               <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
                 <Clock color="white" size={20} />
               </div>
             </div>
+            {errors.startTime && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.startTime.message}
+              </p>
+            )}
           </div>
 
-          <div>
+          <div className="flex flex-col gap-2">
             <label className={labelClass}>Event End Time*</label>
             <div className="relative">
               <input
                 type="time"
-                {...register("endTime", { required: true })}
                 className={`${inputClass} text-white `}
+                {...register("endTime", {
+                  required: "End time is required",
+                  validate: (value) => {
+                    if (startTime && value < startTime) {
+                      return "End time cannot be before start time";
+                    }
+                    if (callTime && value < callTime) {
+                      return "End time cannot be before call time";
+                    }
+                    return true;
+                  },
+                })}
               />
+
               <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
                 <Clock color="white" size={20} />
               </div>
             </div>
+            {errors.endTime && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.endTime.message}
+              </p>
+            )}
           </div>
         </div>
 
@@ -659,13 +697,30 @@ const CreateEvent = () => {
             <div className="relative">
               <input
                 type="time"
-                className={`${inputClass} text-white`}
-                {...register("callTime", { required: true })}
+                className={`${inputClass} text-white `}
+                {...register("callTime", {
+                  required: "Call time is required",
+                  validate: (value) => {
+                    if (startTime && value > startTime) {
+                      return "Call time cannot be after event start time";
+                    }
+                    if (endTime && value > endTime) {
+                      return "Call time cannot be after event end time";
+                    }
+                    return true;
+                  },
+                })}
               />
+
               <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
                 <Clock color="white" size={20} />
               </div>
             </div>
+            {errors.callTime && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.callTime.message}
+              </p>
+            )}
           </div>
 
           {/* Performer Numbers */}
@@ -1004,7 +1059,7 @@ const CreateEvent = () => {
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+            {/* <div className="flex flex-col md:flex-row gap-4 md:gap-6">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
@@ -1027,7 +1082,7 @@ const CreateEvent = () => {
                   Private Event
                 </span>
               </label>
-            </div>
+            </div> */}
           </div>
         </div>
 
