@@ -7,6 +7,7 @@ interface MessageCardProps {
   image?: string;
   onClick: () => void;
   isSelected: boolean;
+  eventName: string;
 }
 
 const MessageCard: React.FC<MessageCardProps> = ({
@@ -14,7 +15,8 @@ const MessageCard: React.FC<MessageCardProps> = ({
   lastMessage,
   image,
   onClick,
-  isSelected
+  isSelected,
+  eventName
 }) => {
   return (
     <div 
@@ -46,7 +48,14 @@ const MessageCard: React.FC<MessageCardProps> = ({
         <div className="flex flex-col md:flex-row flex-1 justify-between items-center px-2 md:px-6 py-2 md:py-4 space-y-4 md:space-y-0">
           <div className="text-white w-full md:w-1/2 flex items-center">
             <p className="font-['Space_Grotesk'] font-normal text-[16px] md:text-[18px] leading-[100%] tracking-[0%] align-middle capitalize text-[#D2D2D2] text-center md:text-left">
-            {senderName?.slice(0,20) || senderName}
+            <p className="font-['Space_Grotesk'] font-normal text-[16px] md:text-[18px] leading-[100%] tracking-[0%] align-middle capitalize text-[#D2D2D2] text-center md:text-left">
+              {senderName?.slice(0,20)}
+            </p>
+            {eventName ? (
+              <p className="text-xs text-white font-['Space_Grotesk'] bg-[#383838] px-2 py-1 rounded">
+                {eventName}
+              </p>
+            ) : null}
             </p>
           </div>
           <div className="hidden md:block w-[2px] h-16 bg-white/50 mx-4"></div>

@@ -25,6 +25,7 @@ interface ChatBoxProps {
   eventId?: string;
   recipientId?: string;
   sender?: any;
+  eventName?: string;
 }
 
 const ChatBox = ({ 
@@ -35,7 +36,8 @@ const ChatBox = ({
   isNewChat = false,
   eventId,
   recipientId,
-  sender
+  sender,
+  eventName
 }: ChatBoxProps) => {
   const [message, setMessage] = useState('');
   const [socket, setSocket] = useState<any>(null);
@@ -220,7 +222,7 @@ const ChatBox = ({
                 <div className="w-full h-full bg-[#383838]" />
               )}
             </div>
-            <span className="ml-3 text-white font-['Space_Grotesk'] text-lg">{recipientName}</span>
+            <span className="ml-3 text-white font-['Space_Grotesk'] text-lg">{recipientName} {eventName ? `- ${eventName}` : ""}</span>
           </div>
         </div>
       </div>
