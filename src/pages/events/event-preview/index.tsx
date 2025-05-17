@@ -110,6 +110,10 @@ const EventPreview = () => {
                 ? "Children"
                 : "All Ages"}
             </li>
+            <li>
+              <span className="font-medium">Location:</span>{" "}
+              {getEventsByVenuesById?.event?.address}
+            </li>
           </ul>
         </div>
 
@@ -119,15 +123,15 @@ const EventPreview = () => {
           </h3>
           <ul className="text-white/90 space-y-2">
             <li>
-              <span className="font-medium">Starts:</span>{" "}
+              <span className="font-medium">Start Date:</span>{" "}
               {formatDate(getEventsByVenuesById?.event.startDate)?.slice(0, 12)}
-              {" at "}
+            </li>
+            <li>
+              <span className="font-medium">Starts:</span>{" "}
               {extractTime(getEventsByVenuesById?.event.startTime)}
             </li>
             <li>
               <span className="font-medium">Ends:</span>{" "}
-              {formatDate(getEventsByVenuesById?.event.startDate)?.slice(0, 12)}
-              {" at "}
               {extractTime(getEventsByVenuesById?.event.endTime)}
             </li>
             <li>
@@ -224,34 +228,32 @@ const EventPreview = () => {
         </div>
       )}
 
-      {getEventsByVenuesById?.event?.specialRequirements && (
-        <div className="mt-8">
-          <div>
-            <h3 className="text-white border-b-[3px] border-[#FF00A2] mb-3 pb-1 text-lg">
-              Budget
-            </h3>
-            <ul className="text-white/90 space-y-2">
-              <li>
-                <span className="font-medium">Host Budget:</span>{" "}
-                {getEventsByVenuesById?.event?.hostBudget || "N/A"}
-              </li>
-              <li>
-                <span className="font-medium">Performer Budget:</span>{" "}
-                {getEventsByVenuesById?.event?.performerBudget || "N/A"}
-              </li>
-              <li>
-                <span className="font-medium">Other Staff Budget:</span>{" "}
-                {getEventsByVenuesById?.event?.otherStaffBudget || "N/A"}
-              </li>
+      <div className="mt-8">
+        <div>
+          <h3 className="text-white border-b-[3px] border-[#FF00A2] mb-3 pb-1 text-lg">
+            Budget
+          </h3>
+          <ul className="text-white/90 space-y-2">
+            <li>
+              <span className="font-medium">Host Budget:</span>{" "}
+              {getEventsByVenuesById?.event?.hostBudget || "N/A"}
+            </li>
+            <li>
+              <span className="font-medium">Performer Budget:</span>{" "}
+              {getEventsByVenuesById?.event?.performerBudget || "N/A"}
+            </li>
+            <li>
+              <span className="font-medium">Other Staff Budget:</span>{" "}
+              {getEventsByVenuesById?.event?.otherStaffBudget || "N/A"}
+            </li>
 
-              <li>
-                <span className="font-medium">Total Event Budget:</span>{" "}
-                {getEventsByVenuesById?.event?.totalEventBudget || "N/A"}
-              </li>
-            </ul>
-          </div>
+            <li>
+              <span className="font-medium">Total Event Budget:</span>{" "}
+              {getEventsByVenuesById?.event?.totalEventBudget || "N/A"}
+            </li>
+          </ul>
         </div>
-      )}
+      </div>
 
       {/* Action Buttons */}
       <div className="mt-20 flex flex-col md:flex-row items-center md:items-start mb-6 md:mb-0 justify-center gap-6 md:gap-4 ">
