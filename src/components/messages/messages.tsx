@@ -48,6 +48,12 @@ const Messages = () => {
     </div>
   );
 
+  if (isRefetching) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF00A2]"></div>
+    </div>
+  );
+
   if (chatsError) return (
     <div className="text-center text-white py-8">
       Failed to load messages
@@ -68,7 +74,7 @@ const Messages = () => {
       <div className="p-4 md:px-8 py-8 md:py-16 bg-black">
         <ChatBox
           chatId={chat._id}
-          recipientName={chat.participant.fullDragName}
+          recipientName={chat.participant.name}
           recipientImage={chat.participant.profilePhoto}
           onBack={handleBack}
           sender={venueProfile?.user}
@@ -85,7 +91,7 @@ const Messages = () => {
         {data.chats.map((chat: Chat) => (
           <MessageCard
             key={chat._id}
-            senderName={chat.participant.fullDragName}
+            senderName={chat.participant.name}
             lastMessage={chat.latestMessage}
             image={chat.participant.profilePhoto}
             onClick={() => setSelectedChat(chat._id)}

@@ -123,6 +123,7 @@ const ChatBox = ({
     newSocket.on('new-message', (message: Message) => {
       console.log('Received new message:', message);
       setMessages(prev => [...prev, message]);
+      if (sender?._id && chatId) newSocket.emit('mark-as-read', { chatId, userId: sender._id });
     });
 
     // Listen for venue responses
