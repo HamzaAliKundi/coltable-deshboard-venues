@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ChatBox from './ChatBox';
 import MessageCard from './MessageCard';
 import { useGetAllChatsQuery } from '../../apis/messages';
 import { useGetVenueProfileQuery } from '../../apis/venues';
 import { useNavigate } from 'react-router-dom';
+import io from 'socket.io-client';
 
 interface Participant {
   _id: string;
@@ -30,6 +31,34 @@ const Messages = () => {
   const { data: venueProfile, isLoading: isLoadingProfile, refetch: refetchProfile } = useGetVenueProfileQuery({});
 
   const navigate = useNavigate();
+  console.log("venueProfile", venueProfile)
+
+  useEffect(() => {
+    if (!venueProfile ?.user?._id) return;
+
+    const socket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', {
+      transports: ['websocket'],
+      reconnection: true,
+      timeout: 10000
+    });
+
+    socket.on('connect', () => {
+      console.log('Socket connected in Messages component');
+      // Join room based on receiverId
+      socket.emit('join', venueProfile.user._id);
+    });
+
+    socket.on('all-chats', () => {
+      // Refetch chats without showing loader
+      refetchChats();
+    });
+
+    return () => {
+      socket.off('connect');
+      socket.off('all-chats');
+      socket.disconnect();
+    };
+  }, [refetchChats, venueProfile?.user?._id]);
 
   const handleBack = async () => {
     setIsRefetching(true);
