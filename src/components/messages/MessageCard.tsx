@@ -8,6 +8,7 @@ interface MessageCardProps {
   onClick: () => void;
   isSelected: boolean;
   eventName: string;
+  unreadCount?: number;
 }
 
 const MessageCard: React.FC<MessageCardProps> = ({
@@ -16,7 +17,8 @@ const MessageCard: React.FC<MessageCardProps> = ({
   image,
   onClick,
   isSelected,
-  eventName
+  eventName,
+  unreadCount
 }) => {
   return (
     <div 
@@ -40,6 +42,11 @@ const MessageCard: React.FC<MessageCardProps> = ({
                 <MessageSquare className="w-[50px] h-[50px] text-gray-400" />
               )}
             </div>
+            {unreadCount ? (
+              <div className="absolute -top-2 -right-2 bg-[#FF00A2] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {unreadCount}
+              </div>
+            ) : null}
           </div>
           <div className="hidden md:block w-[2px] h-16 bg-white/50 mx-4"></div>
         </div>

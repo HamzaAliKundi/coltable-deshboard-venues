@@ -12,6 +12,7 @@ interface Participant {
   email: string;
   profilePhoto: string;
   userType: string;
+  fullDragName: string;
 }
 
 interface Chat {
@@ -22,6 +23,8 @@ interface Chat {
   createdAt: string;
   updatedAt: string;
   participant: Participant;
+  venueUnreadCount?: number;
+  eventName?: string;
 }
 
 const Messages = () => {
@@ -106,7 +109,7 @@ const Messages = () => {
           recipientName={chat.participant.fullDragName}
           recipientImage={chat.participant.profilePhoto}
           onBack={handleBack}
-          eventName={chat.eventName}
+          eventName={chat.eventName || ''}
           sender={venueProfile?.user}
           eventId={chat.event}
           recipientId={chat.participant._id}
@@ -123,10 +126,11 @@ const Messages = () => {
             key={chat._id}
             senderName={chat.participant.fullDragName}
             lastMessage={chat.latestMessage}
-            eventName={chat.eventName}
+            eventName={chat.eventName || ''}
             image={chat.participant.profilePhoto}
             onClick={() => setSelectedChat(chat._id)}
             isSelected={selectedChat === chat._id}
+            unreadCount={chat?.venueUnreadCount}
           />
         ))}
       </div>
