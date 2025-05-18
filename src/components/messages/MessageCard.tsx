@@ -20,6 +20,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
   eventName,
   unreadCount
 }) => {
+  console.log("unreadCount", unreadCount)
   return (
     <div 
       onClick={onClick}
@@ -34,12 +35,12 @@ const MessageCard: React.FC<MessageCardProps> = ({
       <div className="flex flex-col md:flex-row items-center justify-between p-4 md:p-0">
         {/* Left section with avatar */}
         <div className="flex items-center w-full md:w-auto mb-4 md:mb-0">
-          <div className="ml-2">
+          <div className="ml-2 relative">
             <div className="w-18 h-18 rounded-full overflow-hidden border-white">
               {image ? (
-                <img src={image} alt="Profile" className="w-[50px] h-[50px] object-cover" />
+                <img src={image} alt="Profile" className="min-w-[50px] max-w-[50px] min-h-[50px] object-cover" />
               ) : (
-                <MessageSquare className="w-[50px] h-[50px] text-gray-400" />
+                <MessageSquare className="w-full h-full text-gray-400" />
               )}
             </div>
             {unreadCount ? (
