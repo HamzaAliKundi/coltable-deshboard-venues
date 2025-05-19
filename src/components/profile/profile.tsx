@@ -507,7 +507,7 @@ const Profile = () => {
             <label className={labelClass}>Venue Name?*</label>
             <input
               type="text"
-              placeholder="Chapman & Kirby"
+              placeholder="Enter Venue Name"
               className={inputClass}
               disabled={!isEditing}
               {...register("venueName", { required: true })}
@@ -518,7 +518,7 @@ const Profile = () => {
           <div>
             <label className={labelClass}>Tell Us About Your Venue?*</label>
             <textarea
-              placeholder="This Downtown bar transforms into a stage with an electrifying monthly drag brunch show. Those 21 and up can enjoy the performances, along with a brunch buffet, select craft cocktails, and bubbly mimosa flights, plus optional bottle service."
+              placeholder="Enter Venue Description"
               className={`${inputClass} h-[80px] md:h-[130px] resize-none`}
               disabled={!isEditing}
               {...register("aboutVenue", { required: true })}
@@ -530,7 +530,7 @@ const Profile = () => {
             <label className={labelClass}>Top Drag Performers*</label>
             <input
               type="text"
-              placeholder="Performer"
+              placeholder="Enter Top Drag Performers"
               className={inputClass}
               disabled={!isEditing}
               {...register("topPerformers", { required: true })}
@@ -542,7 +542,7 @@ const Profile = () => {
             <label className={labelClass}>Location / Address*</label>
             <input
               type="text"
-              placeholder="2118 Lamar St #100, Houston, TX 77003"
+              placeholder="Enter Location / Address"
               className={inputClass}
               disabled={!isEditing}
               {...register("location", { required: true })}
@@ -596,7 +596,7 @@ const Profile = () => {
                   }
                   options={venueOptions}
                   isDisabled={!isEditing}
-                  placeholder="Select venue type"
+                  placeholder="Select Venue Type"
                 />
               )}
             />
@@ -689,7 +689,7 @@ const Profile = () => {
                       color: "#fff",
                     }),
                   }}
-                  placeholder="Select facilities and features"
+                  placeholder="Select Facilities & Features"
                 />
               )}
             />
