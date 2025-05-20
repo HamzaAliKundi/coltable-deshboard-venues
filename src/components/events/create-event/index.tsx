@@ -84,10 +84,6 @@ const CreateEvent = () => {
     },
   });
 
-  const startTime = watch("startTime");
-  const endTime = watch("endTime");
-  const callTime = watch("callTime");
-
   const handleLogoUpload = async () => {
     const input = document.createElement("input");
     input.type = "file";
@@ -546,15 +542,6 @@ const CreateEvent = () => {
                 className={`${inputClass} text-white `}
                 {...register("startTime", {
                   required: "Start time is required",
-                  validate: (value) => {
-                    if (callTime && value < callTime) {
-                      return "Start time cannot be before call time";
-                    }
-                    if (endTime && value > endTime) {
-                      return "Start time cannot be after end time";
-                    }
-                    return true;
-                  },
                 })}
               />
 
@@ -577,15 +564,6 @@ const CreateEvent = () => {
                 className={`${inputClass} text-white `}
                 {...register("endTime", {
                   required: "End time is required",
-                  validate: (value) => {
-                    if (startTime && value < startTime) {
-                      return "End time cannot be before start time";
-                    }
-                    if (callTime && value < callTime) {
-                      return "End time cannot be before call time";
-                    }
-                    return true;
-                  },
                 })}
               />
 
@@ -700,15 +678,6 @@ const CreateEvent = () => {
                 className={`${inputClass} text-white `}
                 {...register("callTime", {
                   required: "Call time is required",
-                  validate: (value) => {
-                    if (startTime && value > startTime) {
-                      return "Call time cannot be after event start time";
-                    }
-                    if (endTime && value > endTime) {
-                      return "Call time cannot be after event end time";
-                    }
-                    return true;
-                  },
                 })}
               />
 
