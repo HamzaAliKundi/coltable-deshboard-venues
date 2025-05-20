@@ -527,13 +527,13 @@ const Profile = () => {
 
           {/* Top Drag Performers */}
           <div>
-            <label className={labelClass}>Top Drag Performers*</label>
+            <label className={labelClass}>Top Drag Performers</label>
             <input
               type="text"
               placeholder="Enter Top Drag Performers"
               className={inputClass}
               disabled={!isEditing}
-              {...register("topPerformers", { required: true })}
+              {...register("topPerformers")}
             />
           </div>
 
