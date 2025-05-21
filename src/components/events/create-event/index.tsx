@@ -779,7 +779,7 @@ const CreateEvent = () => {
         {/* Special Requests */}
         <div className="flex flex-col gap-2">
           <label className="text-white font-space-grotesk text-sm md:text-base">
-            Any special Requests for the performer?
+          Notes for the performers, including booking fee information, etc.
           </label>
           <textarea
             placeholder="Type..."
@@ -791,7 +791,7 @@ const CreateEvent = () => {
 
         <div className="flex flex-col gap-2">
           <label className="text-white font-space-grotesk text-sm md:text-base">
-            Event Description*
+          Event Description (describe the event for the Public as this will be on the public events calendar description)*
           </label>
           <textarea
             placeholder="Type..."
