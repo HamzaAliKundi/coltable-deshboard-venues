@@ -809,7 +809,7 @@ const CreateEvent = () => {
         {/* Logo Upload */}
         <div className="w-full max-w-[782px] self-center bg-black p-4">
           <h2 className="font-['Space_Grotesk'] text-white text-[20px] leading-[100%] mb-4">
-            Upload Logo
+          Upload Event Flier
           </h2>
 
           <div
@@ -824,7 +824,7 @@ const CreateEvent = () => {
                   alt="Venue Logo"
                   className="w-32 h-32 object-contain mb-4"
                 />
-                <p className="text-[#FF00A2]">Click to change logo</p>
+                <p className="text-[#FF00A2]">Upload Event Flier</p>
               </div>
             ) : (
               <>
