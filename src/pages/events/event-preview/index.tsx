@@ -102,10 +102,10 @@ const EventPreview = () => {
               <span className="font-medium">Audience:</span>{" "}
               {getEventsByVenuesById?.event?.audienceType}
             </li>
-            <li>
+            {/* <li>
               <span className="font-medium">Location:</span>{" "}
               {getEventsByVenuesById?.event?.address}
-            </li>
+            </li> */}
           </ul>
         </div>
 

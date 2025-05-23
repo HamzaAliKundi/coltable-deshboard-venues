@@ -44,13 +44,11 @@ type FormData = {
   specialRequests?: string;
   logo: string;
   performersList: string[];
-  eventLocation: string;
   eventDescription: string;
   performerBudget: string;
   hostBudget: string;
   otherStaffBudget: string;
   totalEventBudget: string;
-  isPrivate: string | boolean;
 };
 
 const CreateEvent = () => {
@@ -210,13 +208,11 @@ const CreateEvent = () => {
           (p: any) => p._id
         ),
 
-        eventLocation: getEventsByVenuesById.event.address || "",
         eventDescription: getEventsByVenuesById.event.description || "",
         totalEventBudget: getEventsByVenuesById.event.totalEventBudget || "",
         otherStaffBudget: getEventsByVenuesById.event.otherStaffBudget || "",
         hostBudget: getEventsByVenuesById.event.hostBudget || "",
         performerBudget: getEventsByVenuesById.event.performerBudget || "",
-        // isPrivate: getEventsByVenuesById.event.isPrivate ? "true" : "false",
       });
 
       if (getEventsByVenuesById?.event?.image) {
@@ -251,13 +247,11 @@ const CreateEvent = () => {
       assignedPerformers: data.performerNumbers,
       image: logoUrl,
       eventCategory: data.eventCategory,
-      address: data.eventLocation,
       description: data.eventDescription,
       performerBudget: data.performerBudget,
       hostBudget: data.hostBudget,
       otherStaffBudget: data.otherStaffBudget,
       totalEventBudget: data.totalEventBudget,
-      // isPrivate: data.isPrivate,
     };
 
     try {
@@ -344,19 +338,19 @@ const CreateEvent = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
             <label className="text-white font-space-grotesk text-sm md:text-base">
-              Event Location*
+              Event Category*
             </label>
             <input
               type="text"
-              placeholder="Event Location"
+              placeholder="Event Category"
               className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
-              {...register("eventLocation", {
-                required: "Event location is required",
+              {...register("eventCategory", {
+                required: "Event category information is required",
               })}
             />
-            {errors.eventLocation && (
+            {errors.eventCategory && (
               <span className="text-red-500 text-sm">
-                {errors.eventLocation.message}
+                {errors.eventCategory.message}
               </span>
             )}
           </div>
@@ -443,26 +437,6 @@ const CreateEvent = () => {
               </span>
             )}
           </div>
-        </div>
-
-        {/* Event Type and Theme */}
-        <div className="flex flex-col gap-2">
-          <label className="text-white font-space-grotesk text-sm md:text-base">
-            Event Category*
-          </label>
-          <input
-            type="text"
-            placeholder="Event Category"
-            className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
-            {...register("eventCategory", {
-              required: "Event category information is required",
-            })}
-          />
-          {errors.eventCategory && (
-            <span className="text-red-500 text-sm">
-              {errors.eventCategory.message}
-            </span>
-          )}
         </div>
 
         {/* Equipment Responsibility */}
@@ -779,7 +753,7 @@ const CreateEvent = () => {
         {/* Special Requests */}
         <div className="flex flex-col gap-2">
           <label className="text-white font-space-grotesk text-sm md:text-base">
-          Notes for the performers, including booking fee information, etc.
+            Notes for the performers, including booking fee information, etc.
           </label>
           <textarea
             placeholder="Type..."
@@ -791,7 +765,8 @@ const CreateEvent = () => {
 
         <div className="flex flex-col gap-2">
           <label className="text-white font-space-grotesk text-sm md:text-base">
-          Event Description (describe the event for the Public as this will be on the public events calendar description)*
+            Event Description (describe the event for the Public as this will be
+            on the public events calendar description)*
           </label>
           <textarea
             placeholder="Type..."
@@ -809,7 +784,7 @@ const CreateEvent = () => {
         {/* Logo Upload */}
         <div className="w-full max-w-[782px] self-center bg-black p-4">
           <h2 className="font-['Space_Grotesk'] text-white text-[20px] leading-[100%] mb-4">
-          Upload Event Flier
+            Upload Event Flier
           </h2>
 
           <div
@@ -836,7 +811,7 @@ const CreateEvent = () => {
                   Of [Specify Dimensions, E.G., 500x500px]
                 </p>
                 <div className="bg-[#FF00A2] text-black rounded-lg px-8 py-3 inline-block font-['Space_Grotesk'] text-[16px] leading-[100%] tracking-[0%] text-center capitalize">
-                Upload Event Flier
+                  Upload Event Flier
                 </div>
               </>
             )}
@@ -1027,31 +1002,6 @@ const CreateEvent = () => {
                 )}
               </div>
             </div>
-
-            {/* <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  {...register("isPrivate")}
-                  value="false"
-                  className="w-5 h-5 text-[#FF00A2] focus:ring-[#FF00A2]"
-                />
-                <span className="text-white font-space-grotesk text-sm md:text-base">
-                  Public Event
-                </span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  {...register("isPrivate")}
-                  value="true"
-                  className="w-5 h-5 text-[#FF00A2] focus:ring-[#FF00A2]"
-                />
-                <span className="text-white font-space-grotesk text-sm md:text-base">
-                  Private Event
-                </span>
-              </label>
-            </div> */}
           </div>
         </div>
 
