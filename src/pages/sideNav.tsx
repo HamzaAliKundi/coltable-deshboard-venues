@@ -6,8 +6,13 @@ import { useGetPerformerProfileQuery } from "../apis/profile";
 import io from 'socket.io-client';
 
 const navItems = [
-  { name: "Venues Profile", path: "/profile" },
-  { name: "Manage Events", path: "/events" },
+  { 
+    name: "My Profile", 
+    path: "/profile",
+    children: [
+      { name: "Media", path: "/profile/media" }
+    ]
+  },
   { name: "Messages", path: "/messages" },
   { name: "Reviews", path: "/review" },
   { name: "Helpful Tools", path: "/tools" },
@@ -104,6 +109,25 @@ const SideNav = ({ isSidebarOpen, toggleSidebar }: SideNavProps) => {
                     </span>
                   )}
                 </NavLink>
+                {/* Render nested children if present */}
+                {item.children && (
+                  <ul className="pl-6 mt-1 space-y-1">
+                    {item.children.map((child) => (
+                      <li key={child.name}>
+                        <NavLink
+                          to={child.path}
+                          className={({ isActive }) =>
+                            `block px-4 py-1 font-['Space_Grotesk'] text-[15px] leading-[100%] align-middle ${
+                              isActive ? "text-[#FFFFFF]" : "text-[#AAAAAA]"
+                            }`
+                          }
+                        >
+                          {child.name}
+                        </NavLink>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))}
             {/* Show logout button only on mobile screens */}

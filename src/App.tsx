@@ -20,6 +20,7 @@ import ForgotPassword from "./components/auth/forgot-password";
 import ResetPassword from "./components/auth/reset-password";
 import PasswordResetEmailSent from "./components/auth/PasswordResetEmailSent";
 import PasswordChangedSuccess from "./components/auth/PasswordChangedSuccess";
+import MediaPage from "./pages/media";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
         <Route element={<ProtectedRoutes />}>
           <Route path="/" element={<Layout />}>
             <Route path="profile" element={<ProfilePage />} />
+            <Route path="profile/media" element={<MediaPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="messages" element={<MessagesPage />} />
             <Route path="tools" element={<ToolsPage />} />

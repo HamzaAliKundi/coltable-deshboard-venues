@@ -8,13 +8,7 @@ import toast from "react-hot-toast";
 import Select from "react-select";
 import CustomSelect from "../../utils/CustomSelect";
 import { Clock, Edit, X } from "lucide-react";
-
-interface MediaSlot {
-  url: string;
-  type: "image" | "video" | "none";
-  cloudUrl?: string;
-  uploading?: boolean;
-}
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -23,15 +17,6 @@ const Profile = () => {
   const { register, handleSubmit, control, reset } = useForm();
   const venueId = JSON.parse(localStorage.getItem("venueId") || '""');
   const [logoUploading, setLogoUploading] = useState(false);
-
-  const [mediaSlots, setMediaSlots] = useState<MediaSlot[]>(
-    Array(10).fill({
-      url: "",
-      type: "none",
-      cloudUrl: "",
-      uploading: false,
-    })
-  );
 
   const venueOptions = [
     { value: "bar/club", label: "Bar/Club" },
@@ -42,6 +27,8 @@ const Profile = () => {
   const [updateProfile, { isLoading: isUpdating }] =
     useUpdateVenueProfileMutation();
   const { data: profileData, isLoading } = useGetSingleVenueByIdQuery(venueId);
+
+  const navigate = useNavigate();
 
   const handleLogoUpload = async () => {
     if (!isEditing) return;
@@ -126,213 +113,6 @@ const Profile = () => {
     return hashHex;
   };
 
-  const handleMediaSelect = async (index: any) => {
-    if (!isEditing) return;
-
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/jpeg,image/png,image/gif,video/mp4,video/quicktime";
-    input.multiple = false;
-
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
-
-      const maxSize = 25 * 1024 * 1024;
-      if (file.size > maxSize) {
-        toast.error(
-          "File size exceeds 25MB limit. Please choose a smaller file."
-        );
-        return;
-      }
-
-      try {
-        // Set uploading state for this slot
-        setMediaSlots((prev) =>
-          prev.map((slot, i) =>
-            i === index ? { ...slot, uploading: true } : slot
-          )
-        );
-
-        const previewUrl = URL.createObjectURL(file);
-        const isVideo = file.type.startsWith("video/");
-
-        // Update preview immediately
-        setMediaSlots((prev) =>
-          prev.map((slot, i) =>
-            i === index
-              ? {
-                  ...slot,
-                  url: previewUrl,
-                  type: isVideo ? "video" : "image",
-                  uploading: true,
-                }
-              : slot
-          )
-        );
-
-        // Upload to Cloudinary
-        const timestamp = Math.round(new Date().getTime() / 1000).toString();
-        const str_to_sign = `timestamp=${timestamp}${
-          import.meta.env.VITE_CLOUDINARY_API_SECRET
-        }`;
-        const signature = await generateSHA1(str_to_sign);
-
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("api_key", import.meta.env.VITE_CLOUDINARY_API_KEY);
-        formData.append("timestamp", timestamp);
-        formData.append("signature", signature);
-
-        const resourceType = isVideo ? "video" : "image";
-        const response = await fetch(
-          `https://api.cloudinary.com/v1_1/${
-            import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
-          }/${resourceType}/upload`,
-          { method: "POST", body: formData }
-        );
-
-        if (!response.ok) throw new Error("Upload failed");
-
-        const data = await response.json();
-
-        // Update with final Cloudinary URL
-        setMediaSlots((prev) =>
-          prev.map((slot, i) =>
-            i === index
-              ? {
-                  ...slot,
-                  url: previewUrl,
-                  type: isVideo ? "video" : "image",
-                  cloudUrl: data.secure_url,
-                  uploading: false,
-                }
-              : slot
-          )
-        );
-
-        toast.success(`${isVideo ? "Video" : "Image"} uploaded successfully!`);
-      } catch (error) {
-        console.error("Failed to upload media:", error);
-        toast.error("Failed to upload media. Please try again.");
-
-        // Revert on error
-        setMediaSlots((prev) =>
-          prev.map((slot, i) =>
-            i === index ? { url: "", type: "none", uploading: false } : slot
-          )
-        );
-      }
-    };
-
-    input.click();
-  };
-
-  // 3. Fixed media removal handler
-  const removeMedia = (index: any) => {
-    setMediaSlots((prev) =>
-      prev.map((slot, i) =>
-        i === index
-          ? { url: "", type: "none", cloudUrl: "", uploading: false }
-          : slot
-      )
-    );
-  };
-
-  // 4. Fixed render media preview function
-  const renderMediaPreview = (index: any) => {
-    const slot = mediaSlots[index];
-
-    if (slot.type === "none") {
-      return (
-        <div className="w-full h-full flex items-center justify-center">
-          {slot.uploading ? (
-            <div className="w-8 h-8 border-4 border-[#FF00A2] border-t-transparent rounded-full animate-spin"></div>
-          ) : (
-            <span className="text-[#383838] text-2xl md:text-3xl">+</span>
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <div className="w-full h-full relative group">
-        {slot.uploading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70">
-            <div className="w-8 h-8 border-4 border-[#FF00A2] border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        )}
-
-        {slot.type === "video" ? (
-          <div className="relative w-full h-full">
-            <video
-              className="w-full h-full object-cover"
-              src={slot.url}
-              controls
-              controlsList="nodownload noremoteplayback noplaybackrate"
-              onClick={(e) => e.stopPropagation()}
-            />
-            {isEditing && (
-              <div className="absolute top-2 right-2 z-10 flex gap-2">
-                <button
-                  className="bg-black bg-opacity-70 text-white w-6 h-6 flex justify-center items-center rounded-full"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleMediaSelect(index);
-                  }}
-                >
-                  <Edit size={12} />
-                </button>
-                <button
-                  className="bg-black bg-opacity-70 text-white p-1 rounded-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeMedia(index);
-                  }}
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <>
-            <img
-              src={slot.url}
-              alt={`Preview ${index + 1}`}
-              className="w-full h-full object-cover"
-            />
-            {isEditing && (
-              <div className="absolute top-2 right-2 z-10 flex gap-2">
-                <button
-                  className="bg-black bg-opacity-70 text-white p-1 rounded-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeMedia(index);
-                  }}
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    );
-  };
-
-  const createEmptyMediaSlots = () => {
-    return Array(10)
-      .fill(null)
-      .map(() => ({
-        url: "",
-        type: "none",
-        cloudUrl: "",
-        uploading: false,
-      }));
-  };
-
   useEffect(() => {
     if (profileData?.user) {
       const [openingTime = "18:00", closingTime = "03:00"] =
@@ -361,91 +141,12 @@ const Profile = () => {
         setLogoPreview(profileData.user.logo);
       }
 
-      const initialSlots = createEmptyMediaSlots();
-
-      // Create a set to track which slots are already filled
-      const filledSlots = new Set();
-
-      // First pass: Load videos (prioritizing videos)
-      if (profileData.user.videos && Array.isArray(profileData.user.videos)) {
-        profileData.user.videos.forEach((url: any, i: any) => {
-          if (url) {
-            // Find the first available slot
-            let slotIndex = i;
-
-            // If this slot is already beyond our array or we need to find the next available slot
-            if (slotIndex >= 10) {
-              // Find the first available slot
-              for (let j = 0; j < 10; j++) {
-                if (!filledSlots.has(j)) {
-                  slotIndex = j;
-                  break;
-                }
-              }
-            }
-
-            // If we found an available slot within our array (0-9)
-            if (slotIndex < 10 && !filledSlots.has(slotIndex)) {
-              initialSlots[slotIndex] = {
-                url: url,
-                type: "video",
-                cloudUrl: url,
-                uploading: false,
-              };
-              filledSlots.add(slotIndex);
-            }
-          }
-        });
-      }
-
-      // Second pass: Load images (in remaining slots)
-      if (profileData.user.images && Array.isArray(profileData.user.images)) {
-        profileData.user.images.forEach((url: any, i: any) => {
-          if (url) {
-            // Find the first available slot
-            let slotIndex = i;
-
-            // If this slot is already filled or beyond our array
-            if (slotIndex >= 10 || filledSlots.has(slotIndex)) {
-              // Find the first available slot
-              for (let j = 0; j < 10; j++) {
-                if (!filledSlots.has(j)) {
-                  slotIndex = j;
-                  break;
-                }
-              }
-            }
-
-            // If we found an available slot within our array (0-9)
-            if (slotIndex < 10 && !filledSlots.has(slotIndex)) {
-              initialSlots[slotIndex] = {
-                url: url,
-                type: "image",
-                cloudUrl: url,
-                uploading: false,
-              };
-              filledSlots.add(slotIndex);
-            }
-          }
-        });
-      }
-
-      setMediaSlots(initialSlots);
-
       reset(formData);
     }
   }, [profileData, reset]);
 
   const onSubmit = async (data: any) => {
     try {
-      const images = mediaSlots
-        .filter((slot) => slot.type === "image" && slot.cloudUrl)
-        .map((slot) => slot.cloudUrl);
-
-      const videos = mediaSlots
-        .filter((slot) => slot.type === "video" && slot.cloudUrl)
-        .map((slot) => slot.cloudUrl);
-
       const transformedData = {
         name: data.venueName,
         description: data.aboutVenue,
@@ -457,8 +158,6 @@ const Profile = () => {
           ? data.facilities.map((item: any) => item.value)
           : [],
         logo: logoUrl,
-        images,
-        videos,
         socialMediaLinks: {
           facebook: data.facebook,
           instagram: data.instagram,
@@ -469,6 +168,9 @@ const Profile = () => {
 
       await updateProfile({ data: transformedData }).unwrap();
       toast.success("Profile updated successfully!");
+      if(!profileData?.user?.isProfileCompleted){
+        navigate("/profile/media");
+      }
       setIsEditing(false);
     } catch (error) {
       console.error("Failed to update profile:", error);
@@ -760,32 +462,6 @@ const Profile = () => {
                   </div>
                 </>
               )}
-            </div>
-          </div>
-
-          {/* Upload Images/Video */}
-          <div className="max-w-[900px] w-full">
-            <h2 className="font-['Space_Grotesk'] text-white font-normal text-[24px] md:text-[36px] leading-[100%] capitalize">
-              Upload images/video
-            </h2>
-            <p className="font-['Space_Grotesk'] mt-4 md:mt-6 text-white font-normal text-[12px] md:text-[13px] leading-[120%] md:leading-[100%] align-middle">
-              Upload JPG, PNG, GIF, or MP4. Maximum of 10 photos and video clips
-              combined (max 25MB, 1200x800px or larger for images).
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mt-5 md:mt-7">
-              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((index) => (
-                <div
-                  key={index}
-                  onClick={() => isEditing && handleMediaSelect(index)}
-                  className={`aspect-square w-full max-w-[214px] bg-[#0D0D0D] rounded-[12px] md:rounded-[16px] overflow-hidden ${
-                    isEditing
-                      ? "cursor-pointer hover:bg-[#1A1A1A] transition-colors"
-                      : "cursor-default"
-                  }`}
-                >
-                  {renderMediaPreview(index)}
-                </div>
-              ))}
             </div>
           </div>
 
