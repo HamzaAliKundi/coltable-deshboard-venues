@@ -3,16 +3,15 @@ import { IoMdClose } from "react-icons/io";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useGetTotalUnreadCountQuery } from "../apis/messages";
 import { useGetPerformerProfileQuery } from "../apis/profile";
-import io from 'socket.io-client';
+import io from "socket.io-client";
 
 const navItems = [
-  { 
-    name: "My Profile", 
+  {
+    name: "My Profile",
     path: "/profile",
-    children: [
-      { name: "Media", path: "/profile/media" }
-    ]
+    children: [{ name: "Media", path: "/profile/media" }],
   },
+  { name: "Events", path: "/events" },
   { name: "Messages", path: "/messages" },
   { name: "Reviews", path: "/review" },
   { name: "Helpful Tools", path: "/tools" },
@@ -33,39 +32,43 @@ const SideNav = ({ isSidebarOpen, toggleSidebar }: SideNavProps) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
 
-  const { data: unreadCount, refetch: refetchUnreadCount } = useGetTotalUnreadCountQuery({})
+  const { data: unreadCount, refetch: refetchUnreadCount } =
+    useGetTotalUnreadCountQuery({});
   const { data: profileData } = useGetPerformerProfileQuery({});
 
   useEffect(() => {
-    const socket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', {
-      transports: ['websocket'],
-      reconnection: true,
-      timeout: 10000
-    });
+    const socket = io(
+      import.meta.env.VITE_SOCKET_URL || "http://localhost:5000",
+      {
+        transports: ["websocket"],
+        reconnection: true,
+        timeout: 10000,
+      }
+    );
 
-    socket.on('connect', () => {
-      console.log('Socket connected in SideNav');
+    socket.on("connect", () => {
+      console.log("Socket connected in SideNav");
       if (profileData?.user?._id) {
-        socket.emit('join', profileData.user._id);
-        socket.emit('get-unread-counts', { userId: profileData.user._id });
+        socket.emit("join", profileData.user._id);
+        socket.emit("get-unread-counts", { userId: profileData.user._id });
       }
     });
 
-    socket.on('new-message', () => {
+    socket.on("new-message", () => {
       if (profileData?.user?._id) {
-        socket.emit('get-unread-counts', { userId: profileData.user._id });
+        socket.emit("get-unread-counts", { userId: profileData.user._id });
       }
     });
 
-    socket.on('total-unread-count', (data: TotalUnreadCountEvent) => {
-      console.log('Total unread count received:', data);
+    socket.on("total-unread-count", (data: TotalUnreadCountEvent) => {
+      console.log("Total unread count received:", data);
       refetchUnreadCount();
     });
 
     return () => {
-      socket.off('connect');
-      socket.off('new-message');
-      socket.off('total-unread-count');
+      socket.off("connect");
+      socket.off("new-message");
+      socket.off("total-unread-count");
       socket.disconnect();
     };
   }, [refetchUnreadCount, profileData?.user?._id]);
@@ -96,18 +99,23 @@ const SideNav = ({ isSidebarOpen, toggleSidebar }: SideNavProps) => {
                   to={item.path}
                   className={({ isActive }) => {
                     const pathWithoutSlash = item.path.substring(1);
-                    const isPathActive = location.pathname.includes(pathWithoutSlash.replace('s', ''));
+                    const isPathActive = location.pathname.includes(
+                      pathWithoutSlash.replace("s", "")
+                    );
                     return `block px-4 py-2 font-['Space_Grotesk'] text-[16px] leading-[100%] align-middle ${
-                      isActive || isPathActive ? "text-[#FFFFFF]" : "text-[#888888]"
+                      isActive || isPathActive
+                        ? "text-[#FFFFFF]"
+                        : "text-[#888888]"
                     } relative`;
                   }}
                 >
                   {item.name}
-                  {item.name === "Messages" && unreadCount?.totalUnreadCount > 0 && (
-                    <span className="absolute top-0 right-40 md:top-[0px] md:right-36 lg:top-[0px] lg:right-24 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                      {unreadCount?.totalUnreadCount}
-                    </span>
-                  )}
+                  {item.name === "Messages" &&
+                    unreadCount?.totalUnreadCount > 0 && (
+                      <span className="absolute top-0 right-40 md:top-[0px] md:right-36 lg:top-[0px] lg:right-24 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
+                        {unreadCount?.totalUnreadCount}
+                      </span>
+                    )}
                 </NavLink>
                 {/* Render nested children if present */}
                 {item.children && (
