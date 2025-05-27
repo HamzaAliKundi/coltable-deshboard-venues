@@ -57,6 +57,8 @@ const CreateEvent = () => {
   const [logoPreview, setLogoPreview] = useState("");
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoUrl, setLogoUrl] = useState("");
+   const [logoError, setLogoError] = useState("");
+  const [isLogoError, setIsLogoError] = useState(false);
 
   const [addEventByVenue, { isLoading: createEventLoading }] =
     useAddEventByVenueMutation();
@@ -224,7 +226,9 @@ const CreateEvent = () => {
   }, [id, getEventsByVenuesById, reset]);
 
   const onSubmit = async (data: FormData) => {
-    if (!logoUrl.trim()) {
+   if (!logoUrl.trim()) {
+      setIsLogoError(true);
+      setLogoError("Flier is required");
       return;
     }
     const today = new Date().toISOString().split("T")[0];
@@ -820,10 +824,8 @@ const CreateEvent = () => {
               </>
             )}
           </div>
-          {!logoUrl.trim() && (
-            <span className="text-red-500 text-sm">
-              Event flier is required
-            </span>
+        {isLogoError && (
+            <span className="text-red-500 text-sm">{logoError}</span>
           )}
         </div>
 
