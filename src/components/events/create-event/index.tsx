@@ -73,6 +73,7 @@ const CreateEvent = () => {
     register,
     handleSubmit,
     reset,
+    setError,
     watch,
     control,
     formState: { errors },
@@ -223,6 +224,9 @@ const CreateEvent = () => {
   }, [id, getEventsByVenuesById, reset]);
 
   const onSubmit = async (data: FormData) => {
+    if (!logoUrl.trim()) {
+      return;
+    }
     const today = new Date().toISOString().split("T")[0];
 
     const transformedData = {
@@ -784,7 +788,7 @@ const CreateEvent = () => {
         {/* Logo Upload */}
         <div className="w-full max-w-[782px] self-center bg-black p-4">
           <h2 className="font-['Space_Grotesk'] text-white text-[20px] leading-[100%] mb-4">
-            Upload Event Flier
+            Upload Event Flier <span className="text-[#FF00A2]">*</span>
           </h2>
 
           <div
@@ -816,6 +820,11 @@ const CreateEvent = () => {
               </>
             )}
           </div>
+          {!logoUrl.trim() && (
+            <span className="text-red-500 text-sm">
+              Event flier is required
+            </span>
+          )}
         </div>
 
         {/* Book Performer */}
