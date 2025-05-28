@@ -28,7 +28,8 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const onSubmit = async (data: any) => {
     setIsLoading(true);
     try {
-      const res:any = await login(data);
+      const payload = { ...data, userType: "venue" };
+      const res:any = await login(payload);
       if(res?.data?.success === true) {
         localStorage.setItem("token", res?.data?.token);
         toast.success("Login successful");
