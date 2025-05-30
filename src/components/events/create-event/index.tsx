@@ -250,7 +250,7 @@ const CreateEvent = () => {
       isEquipmentProvidedByPerformer: data.equipmentResponsibility,
       performers: data.performersCount,
       performersList: data.performersList,
-      startDate: data.eventStartDate,
+      startDate: new Date(data.eventStartDate).toISOString(),
       musicFormat: data.musicDeadline,
       assignedPerformers: data.performerNumbers,
       image: logoUrl,
