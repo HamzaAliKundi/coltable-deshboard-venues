@@ -126,10 +126,12 @@ const Profile = () => {
         openingTime: openingTime || "18:00",
         closingTime: closingTime || "03:00",
         venueType: profileData.user.venueType,
-        facilities: profileData.user.facilities?.map((f: any) => ({
-          value: f,
-          label: f.charAt(0).toUpperCase() + f.slice(1).replace("-", " "),
-        })),
+        facilities: profileData.user.facilities
+          ? profileData.user.facilities.map((f: any) => ({
+              value: f,
+              label: f.charAt(0).toUpperCase() + f.slice(1).replace("-", " "),
+            }))
+          : [],
         facebook: profileData.user.socialMediaLinks?.facebook || "",
         instagram: profileData.user.socialMediaLinks?.instagram || "",
         tiktok: profileData.user.socialMediaLinks?.tiktok || "",
@@ -306,11 +308,10 @@ const Profile = () => {
 
           {/* Facilities & Features */}
           <div>
-            <label className={labelClass}>Facilities & Features*</label>
+            <label className={labelClass}>Facilities & Features</label>
             <Controller
               name="facilities"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <Select
                   {...field}
