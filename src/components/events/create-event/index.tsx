@@ -28,7 +28,6 @@ type FormData = {
   eventType: string;
   soundEquipment?: string;
   outdoorCoverings?: string;
-  eventCategory?: string;
   eventTheme?: string;
   audienceType: string;
   equipmentResponsibility: string;
@@ -57,7 +56,7 @@ const CreateEvent = () => {
   const [logoPreview, setLogoPreview] = useState("");
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoUrl, setLogoUrl] = useState("");
-   const [logoError, setLogoError] = useState("");
+  const [logoError, setLogoError] = useState("");
   const [isLogoError, setIsLogoError] = useState(false);
 
   const [addEventByVenue, { isLoading: createEventLoading }] =
@@ -206,7 +205,6 @@ const CreateEvent = () => {
         performerNumbers: String(
           getEventsByVenuesById.event.assignedPerformers || ""
         ),
-        eventCategory: getEventsByVenuesById.event.eventCategory || "",
         performersList: getEventsByVenuesById.event.performersList.map(
           (p: any) => p._id
         ),
@@ -226,7 +224,7 @@ const CreateEvent = () => {
   }, [id, getEventsByVenuesById, reset]);
 
   const onSubmit = async (data: FormData) => {
-   if (!logoUrl.trim()) {
+    if (!logoUrl.trim()) {
       setIsLogoError(true);
       setLogoError("Flier is required");
       return;
@@ -254,7 +252,6 @@ const CreateEvent = () => {
       musicFormat: data.musicDeadline,
       assignedPerformers: data.performerNumbers,
       image: logoUrl,
-      eventCategory: data.eventCategory,
       description: data.eventDescription,
       performerBudget: data.performerBudget,
       hostBudget: data.hostBudget,
@@ -343,55 +340,35 @@ const CreateEvent = () => {
         </div>
 
         {/* Event type dropdown */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-white font-space-grotesk text-sm md:text-base">
-              Event Category*
-            </label>
-            <input
-              type="text"
-              placeholder="Event Category"
-              className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
-              {...register("eventCategory", {
-                required: "Event category information is required",
-              })}
-            />
-            {errors.eventCategory && (
-              <span className="text-red-500 text-sm">
-                {errors.eventCategory.message}
-              </span>
-            )}
-          </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-white font-space-grotesk text-sm md:text-base">
-              Event type*
-            </label>
-            <Controller
-              name="eventType"
-              control={control}
-              rules={{ required: "Event type is required" }}
-              render={({ field }) => (
-                <CustomSelect
-                  {...field}
-                  value={eventOptions.find(
-                    (option) => option.value === field.value
-                  )}
-                  onChange={(selectedOption: any) =>
-                    field.onChange(selectedOption?.value)
-                  }
-                  options={eventOptions}
-                  isDisabled={false}
-                  placeholder="Select event type"
-                />
-              )}
-            />
-            {errors.eventType && (
-              <span className="text-red-500 text-sm">
-                {errors.eventType.message}
-              </span>
+        <div className="flex flex-col gap-2">
+          <label className="text-white font-space-grotesk text-sm md:text-base">
+            Event type*
+          </label>
+          <Controller
+            name="eventType"
+            control={control}
+            rules={{ required: "Event type is required" }}
+            render={({ field }) => (
+              <CustomSelect
+                {...field}
+                value={eventOptions.find(
+                  (option) => option.value === field.value
+                )}
+                onChange={(selectedOption: any) =>
+                  field.onChange(selectedOption?.value)
+                }
+                options={eventOptions}
+                isDisabled={false}
+                placeholder="Select event type"
+              />
             )}
-          </div>
+          />
+          {errors.eventType && (
+            <span className="text-red-500 text-sm">
+              {errors.eventType.message}
+            </span>
+          )}
         </div>
 
         {/* Sound Equipment and Outdoor Venue Questions */}
@@ -824,7 +801,7 @@ const CreateEvent = () => {
               </>
             )}
           </div>
-        {isLogoError && (
+          {isLogoError && (
             <span className="text-red-500 text-sm">{logoError}</span>
           )}
         </div>
@@ -941,15 +918,13 @@ const CreateEvent = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
                 <label className="text-white font-space-grotesk text-sm md:text-base">
-                  Host Budget*
+                  Host Budget
                 </label>
                 <input
                   type="text"
                   placeholder="Amount"
                   className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
-                  {...register("hostBudget", {
-                    required: "Host Budget is required",
-                  })}
+                  {...register("hostBudget")}
                 />
                 {errors.hostBudget && (
                   <span className="text-red-500 text-sm">
@@ -960,15 +935,13 @@ const CreateEvent = () => {
 
               <div className="flex flex-col gap-2">
                 <label className="text-white font-space-grotesk text-sm md:text-base">
-                  Performer Budget*
+                  Performer Budget
                 </label>
                 <input
                   type="text"
                   placeholder="Amount"
                   className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
-                  {...register("performerBudget", {
-                    required: "Performer Budget is required",
-                  })}
+                  {...register("performerBudget")}
                 />
                 {errors.performerBudget && (
                   <span className="text-red-500 text-sm">
