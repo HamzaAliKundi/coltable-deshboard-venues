@@ -33,7 +33,27 @@ const Events = () => {
     setCurrentPage(newPage);
   };
 
+  // Helper function to handle timezone adjustments
+  const getLocalDateSafe = (dateString: string) => {
+    const date = new Date(dateString);
+    if (
+      date.getUTCHours() === 0 &&
+      date.getUTCMinutes() === 0 &&
+      date.getUTCSeconds() === 0
+    ) {
+      const localDate = new Date(date);
+      const localDay = localDate.getDate();
+      const utcDay = date.getUTCDate();
+      if (localDay < utcDay) {
+        localDate.setDate(localDate.getDate() + 1);
+        return localDate;
+      }
+    }
+    return date;
+  };
+
   const formatDate = (dateString: string) => {
+    const date = getLocalDateSafe(dateString);
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
       month: "short",
@@ -41,20 +61,20 @@ const Events = () => {
       hour: "2-digit",
       minute: "2-digit",
     };
-    return new Date(dateString).toLocaleDateString("en-US", options);
+    return date.toLocaleDateString("en-US", options);
   };
 
   const extractTime = (dateString: string) => {
-    const date = new Date(dateString);
+    const date = getLocalDateSafe(dateString);
     let hours = date.getHours();
     let minutes = date.getMinutes();
     const ampm = hours >= 12 ? "PM" : "AM";
 
     hours = hours % 12;
     hours = hours ? hours : 12;
-    minutes = minutes < 10 ? "0" + minutes : minutes;
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes.toString();
 
-    return `${hours}:${minutes} ${ampm}`;
+    return `${hours}:${formattedMinutes} ${ampm}`;
   };
 
   const handleDeleteClick = async (id: string) => {

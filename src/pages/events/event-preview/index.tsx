@@ -7,7 +7,27 @@ const EventPreview = () => {
   const { data: getEventsByVenuesById, isLoading: getEventLoading } =
     useGetEventsByVenuesByIdQuery(id);
 
+  // Helper function to handle timezone adjustments
+  const getLocalDateSafe = (dateString: string) => {
+    const date = new Date(dateString);
+    if (
+      date.getUTCHours() === 0 &&
+      date.getUTCMinutes() === 0 &&
+      date.getUTCSeconds() === 0
+    ) {
+      const localDate = new Date(date);
+      const localDay = localDate.getDate();
+      const utcDay = date.getUTCDate();
+      if (localDay < utcDay) {
+        localDate.setDate(localDate.getDate() + 1);
+        return localDate;
+      }
+    }
+    return date;
+  };
+
   const formatDate = (dateString: string) => {
+    const date = getLocalDateSafe(dateString);
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
       month: "short",
@@ -15,24 +35,24 @@ const EventPreview = () => {
       hour: "2-digit",
       minute: "2-digit",
     };
-    return new Date(dateString).toLocaleDateString("en-US", options);
+    return date.toLocaleDateString("en-US", options);
   };
 
   const extractTime = (dateString: string) => {
-    const date = new Date(dateString);
+    const date = getLocalDateSafe(dateString);
     let hours = date.getHours();
     let minutes = date.getMinutes();
     const ampm = hours >= 12 ? "PM" : "AM";
 
     hours = hours % 12;
     hours = hours ? hours : 12;
-    minutes = minutes < 10 ? "0" + minutes : minutes;
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes.toString();
 
-    return `${hours}:${minutes} ${ampm}`;
+    return `${hours}:${formattedMinutes} ${ampm}`;
   };
 
-  const formatEventType = (type: any) => {
-    const types = {
+  const formatEventType = (type: string) => {
+    const types: Record<string, string> = {
       "drag-show": "Drag Show",
       "drag-brunch": "Drag Brunch",
       "drag-bingo": "Drag Bingo",
@@ -112,19 +132,19 @@ const EventPreview = () => {
           <ul className="text-white/90 space-y-2">
             <li>
               <span className="font-medium">Start Date:</span>{" "}
-              {formatDate(getEventsByVenuesById?.event.startDate)?.slice(0, 12)}
+              {formatDate(getEventsByVenuesById?.event?.startDate)?.slice(0, 12)}
             </li>
             <li>
               <span className="font-medium">Starts:</span>{" "}
-              {extractTime(getEventsByVenuesById?.event.startTime)}
+              {extractTime(getEventsByVenuesById?.event?.startTime)}
             </li>
             <li>
               <span className="font-medium">Ends:</span>{" "}
-              {extractTime(getEventsByVenuesById?.event.endTime)}
+              {extractTime(getEventsByVenuesById?.event?.endTime)}
             </li>
             <li>
               <span className="font-medium">Call Time:</span>{" "}
-              {extractTime(getEventsByVenuesById?.event.eventCallTime)}
+              {extractTime(getEventsByVenuesById?.event?.eventCallTime)}
             </li>
 
             <li>
