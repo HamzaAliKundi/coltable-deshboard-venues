@@ -227,11 +227,15 @@ const EventPreview = () => {
           </h3>
           <p className="text-white/90">
             <span className="font-medium">Description:</span>{" "}
-            {getEventsByVenuesById?.event?.description || "N/A"}
+            <span dangerouslySetInnerHTML={{ 
+              __html: getEventsByVenuesById?.event?.description?.replace(/\n/g, '<br />') || "N/A" 
+            }} />
           </p>
           <p className="text-white/90">
             <span className="font-medium">Special Request For Performer:</span>{" "}
-            {getEventsByVenuesById?.event?.specialRequirements || "N/A"}
+            <span dangerouslySetInnerHTML={{ 
+              __html: getEventsByVenuesById?.event?.specialRequirements?.replace(/\n/g, '<br />') || "N/A" 
+            }} />
           </p>
         </div>
       )}
