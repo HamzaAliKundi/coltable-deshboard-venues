@@ -29,7 +29,7 @@ type FormData = {
   soundEquipment?: string;
   outdoorCoverings?: string;
   eventTheme?: string;
-  audienceType: string;
+  audienceType: string[];
   equipmentResponsibility: string;
   startTime: string;
   endTime: string;
@@ -68,7 +68,7 @@ const CreateEvent = () => {
       skip: !id,
     });
 
-  const { data: performersData } = useGetAllPerformersQuery();
+  const { data: performersData } = useGetAllPerformersQuery("");
 
   const {
     register,
@@ -78,11 +78,7 @@ const CreateEvent = () => {
     watch,
     control,
     formState: { errors },
-  } = useForm<FormData>({
-    defaultValues: {
-      isPrivate: false,
-    },
-  });
+  } = useForm<FormData>();
 
   const handleLogoUpload = async () => {
     const input = document.createElement("input");
@@ -189,7 +185,7 @@ const CreateEvent = () => {
 
         eventName: getEventsByVenuesById.event.title || "",
         eventHost: getEventsByVenuesById.event.host || "",
-        audienceType: getEventsByVenuesById.event.audienceType,
+        audienceType: getEventsByVenuesById.event.audienceType || [],
         musicDeadline: getEventsByVenuesById.event.musicFormat || undefined,
         equipmentResponsibility:
           getEventsByVenuesById.event.isEquipmentProvidedByPerformer || "",
@@ -435,20 +431,88 @@ const CreateEvent = () => {
               name="audienceType"
               control={control}
               rules={{ required: "Audience type is required" }}
-              render={({ field }) => (
-                <CustomSelect
-                  {...field}
-                  value={audienceOptions.find(
-                    (option) => option.value === field.value
-                  )}
-                  onChange={(selectedOption) =>
-                    field.onChange(selectedOption?.value)
-                  }
-                  options={audienceOptions}
-                  isDisabled={false}
-                  placeholder="Select audience type"
-                />
-              )}
+              render={({ field }) => {
+                const selectedOptions = field.value?.map((value: string) => ({
+                  value,
+                  label: value,
+                })) || [];
+
+                return (
+                  <Select
+                    value={selectedOptions}
+                    onChange={(options) => {
+                      const selectedValues = options?.map((option) => option.value) || [];
+                      field.onChange(selectedValues);
+                    }}
+                    isMulti
+                    closeMenuOnSelect={false}
+                    options={audienceOptions}
+                    className="w-full"
+                    styles={{
+                      control: (base) => ({
+                        ...base,
+                        minHeight: "50px",
+                        background: "#0D0D0D",
+                        border: "0px solid transparent",
+                        borderRadius: "8px",
+                        boxShadow: "none",
+                        "&:hover": {
+                          border: "1px solid #383838",
+                        },
+                      }),
+                      menu: (base) => ({
+                        ...base,
+                        background: "#1D1D1D",
+                        border: "1px solid #383838",
+                        borderRadius: "4px",
+                      }),
+                      option: (base, state) => ({
+                        ...base,
+                        background: state.isFocused ? "#383838" : "#1D1D1D",
+                        color: "#fff",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        "&::before": {
+                          content: '""',
+                          display: "block",
+                          width: "16px",
+                          height: "16px",
+                          border: "2px solid #fff",
+                          borderRadius: "50%",
+                          backgroundColor: state.isSelected
+                            ? "#FF00A2"
+                            : "transparent",
+                        },
+                      }),
+                      multiValue: (base) => ({
+                        ...base,
+                        background: "#383838",
+                        borderRadius: "4px",
+                      }),
+                      multiValueLabel: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+                      multiValueRemove: (base) => ({
+                        ...base,
+                        color: "#fff",
+                        ":hover": {
+                          background: "#4a4a4a",
+                          borderRadius: "0 4px 4px 0",
+                        },
+                      }),
+                      input: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+                    }}
+                    placeholder="Select audience types"
+                    noOptionsMessage={() => "No audience types available"}
+                  />
+                );
+              }}
             />
             {errors.audienceType && (
               <span className="text-red-500 text-sm">
@@ -738,7 +802,7 @@ const CreateEvent = () => {
         {/* Special Requests */}
         <div className="flex flex-col gap-2">
           <label className="text-white font-space-grotesk text-sm md:text-base">
-            Notes for the performers, including booking fee information, etc.
+            Notes for the performers, including booking fee information, etc.
           </label>
           <textarea
             placeholder="Type..."
@@ -751,7 +815,7 @@ const CreateEvent = () => {
         <div className="flex flex-col gap-2">
           <label className="text-white font-space-grotesk text-sm md:text-base">
             Event Description (describe the event for the Public as this will be
-            on the public events calendar description)*
+            on the public events calendar description)*
           </label>
           <textarea
             placeholder="Type..."

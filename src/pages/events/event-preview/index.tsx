@@ -116,7 +116,9 @@ const EventPreview = () => {
 
             <li>
               <span className="font-medium">Audience:</span>{" "}
-              {getEventsByVenuesById?.event?.audienceType}
+              {Array.isArray(getEventsByVenuesById?.event?.audienceType) 
+                ? getEventsByVenuesById?.event?.audienceType.join(", ")
+                : getEventsByVenuesById?.event?.audienceType || "N/A"}
             </li>
             {/* <li>
               <span className="font-medium">Location:</span>{" "}
