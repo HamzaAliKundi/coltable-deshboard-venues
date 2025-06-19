@@ -24,7 +24,7 @@ import CustomSelect from "../../../utils/CustomSelect";
 
 type FormData = {
   eventName: string;
-  eventHost: string;
+  eventHost: Array<{ value: string; label: string; isCustom?: boolean }>;
   eventType: string;
   soundEquipment?: string;
   outdoorCoverings?: string;
@@ -184,7 +184,7 @@ const CreateEvent = () => {
           : undefined,
 
         eventName: getEventsByVenuesById.event.title || "",
-        eventHost: getEventsByVenuesById.event.host || "",
+        eventHost: getEventsByVenuesById.event.host || [],
         audienceType: getEventsByVenuesById.event.audienceType || [],
         musicDeadline: getEventsByVenuesById.event.musicFormat || undefined,
         equipmentResponsibility:
@@ -234,7 +234,7 @@ const CreateEvent = () => {
 
       type: data.eventType,
       title: data.eventName,
-      host: data.eventHost,
+      host: data.eventHost.map(h => h.label),
       specialRequirements: data.specialRequests,
       audienceType: data.audienceType,
       hosts: data.hostsCount,
@@ -321,11 +321,122 @@ const CreateEvent = () => {
             <label className="text-white font-space-grotesk text-sm md:text-base">
               Event Host*
             </label>
-            <input
-              type="text"
-              placeholder="Event Host Name"
-              className="w-full h-12 bg-[#0D0D0D] rounded-lg px-3 text-white font-space-grotesk text-base placeholder:text-[#878787] focus:outline-none focus:ring-1 focus:ring-pink-500"
-              {...register("eventHost", { required: "Event host is required" })}
+            <Controller
+              name="eventHost"
+              control={control}
+              rules={{ required: "Event host is required" }}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  isMulti
+                  isDisabled={false}
+                  closeMenuOnSelect={false}
+                  options={[
+                    ...(performersData?.map((performer: any) => ({
+                      value: performer._id,
+                      label:
+                        performer.fullDragName ||
+                        performer.name ||
+                        performer.firstName ||
+                        performer.email,
+                    })) || []),
+                    {
+                      value: "custom",
+                      label: "+ Add Other Host",
+                      isCustom: true,
+                    },
+                  ]}
+                  className="w-full"
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      minHeight: "46px",
+                      background: "#0D0D0D",
+                      border: "1px solid #383838",
+                      borderRadius: "16px",
+                      boxShadow: "none",
+                      "&:hover": {
+                        border: "1px solid #383838",
+                      },
+                    }),
+                    menu: (base) => ({
+                      ...base,
+                      background: "#1D1D1D",
+                      border: "1px solid #383838",
+                      borderRadius: "4px",
+                    }),
+                    option: (base, state) => ({
+                      ...base,
+                      background: state.isFocused ? "#383838" : "#1D1D1D",
+                      color: "#fff",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      "&::before": {
+                        content: '""',
+                        display: "block",
+                        width: "16px",
+                        height: "16px",
+                        border: "2px solid #fff",
+                        borderRadius: "50%",
+                        backgroundColor: state.isSelected
+                          ? "#FF00A2"
+                          : "transparent",
+                      },
+                    }),
+                    multiValue: (base) => ({
+                      ...base,
+                      background: "#383838",
+                      borderRadius: "4px",
+                    }),
+                    multiValueLabel: (base) => ({
+                      ...base,
+                      color: "#fff",
+                    }),
+                    multiValueRemove: (base) => ({
+                      ...base,
+                      color: "#fff",
+                      ":hover": {
+                        background: "#4a4a4a",
+                        borderRadius: "0 4px 4px 0",
+                      },
+                    }),
+                    input: (base) => ({
+                      ...base,
+                      color: "#fff",
+                    }),
+                  }}
+                  placeholder="Select hosts"
+                  onChange={(selectedOptions) => {
+                    const lastOption =
+                      selectedOptions?.[selectedOptions.length - 1];
+                    if (lastOption?.isCustom) {
+                      const customValue = prompt("Enter custom host name:");
+                      if (customValue?.trim()) {
+                        const newHost = {
+                          value: customValue.toLowerCase().replace(/\s+/g, "-"),
+                          label: customValue.trim(),
+                        };
+                        const currentHosts = Array.isArray(field.value)
+                          ? [...field.value]
+                          : [];
+                        if (
+                          !currentHosts.some(
+                            (h) =>
+                              (typeof h === "object" ? h.label : h) ===
+                              customValue.trim()
+                          )
+                        ) {
+                          field.onChange([...currentHosts, newHost]);
+                        }
+                      }
+                      return;
+                    }
+                    field.onChange(selectedOptions);
+                  }}
+                />
+              )}
             />
             {errors.eventHost && (
               <span className="text-red-500 text-sm">
@@ -1035,7 +1146,7 @@ const CreateEvent = () => {
 
               <div className="flex flex-col gap-2">
                 <label className="text-white font-space-grotesk text-sm md:text-base">
-                  Total Event Budget*
+                  Total Event Budget
                 </label>
                 <input
                   type="text"
