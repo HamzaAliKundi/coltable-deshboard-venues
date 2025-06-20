@@ -34,6 +34,7 @@ export const eventsApi = createApi({
 
     getEventsByVenuesById: builder.query({
       query: (id) => `/api/venue/event/get-single-event/${id}`,
+      keepUnusedDataFor: 0,
     }),
 
     deleteEventByVenue: builder.mutation({
