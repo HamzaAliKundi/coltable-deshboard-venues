@@ -157,6 +157,19 @@ const CreateEvent = () => {
 
   useEffect(() => {
     if (id && getEventsByVenuesById?.event) {
+      // Helper function to transform host data
+      const transformHostData = (hosts: any) => {
+        if (!hosts) return [];
+        if (Array.isArray(hosts)) {
+          return hosts.map((host, index) => ({
+            value: `custom-${index}`,
+            label: host,
+            isCustom: true
+          }));
+        }
+        return [];
+      };
+
       reset({
         eventType: getEventsByVenuesById.event.type || "",
 
@@ -184,7 +197,7 @@ const CreateEvent = () => {
           : undefined,
 
         eventName: getEventsByVenuesById.event.title || "",
-        eventHost: getEventsByVenuesById.event.host || [],
+        eventHost: transformHostData(getEventsByVenuesById.event.host),
         audienceType: getEventsByVenuesById.event.audienceType || [],
         musicDeadline: getEventsByVenuesById.event.musicFormat || undefined,
         equipmentResponsibility:

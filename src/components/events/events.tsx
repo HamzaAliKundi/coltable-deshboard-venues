@@ -212,7 +212,9 @@ const Events = () => {
                         className="w-4 h-4"
                       />
                       <p className="font-['Space_Grotesk'] font-normal text-sm leading-none text-white">
-                        {event.host || "N/A"}
+                        {event?.user?.name?.length > 20 
+                          ? `${event.user.name.substring(0, 20)}...` 
+                          : event?.user?.name || "N/A"}
                       </p>
                     </div>
                   </div>
