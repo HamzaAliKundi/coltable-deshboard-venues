@@ -246,11 +246,12 @@ const Profile = () => {
             <label className={labelClass}>Location / Address*</label>
             <input
               type="text"
-              placeholder="Enter Location / Address"
+              placeholder="e.g., 123 Main Street, New York, NY 10001"
               className={inputClass}
               disabled={!isEditing}
               {...register("location", { required: true })}
             />
+            <p className="text-gray-400 text-sm mt-1">Please enter address in format: Street, City, State ZIP</p>
           </div>
 
           {/* Hours of Operation */}
