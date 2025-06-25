@@ -157,8 +157,6 @@ const Settings = () => {
             >
               Report a Bug
             </a>
-            {' - Email: '}
-            <span className="text-[#FF00A2]">colt.ables@gmail.com</span>
           </div>
           <div className="font-space-grotesk text-base text-[#A4A4A4]">
             <a 
@@ -167,8 +165,6 @@ const Settings = () => {
             >
               Feature Requests
             </a>
-            {' - Email: '}
-            <span className="text-[#FF00A2]">colt.ables@gmail.com</span>
           </div>
           <div className="font-space-grotesk text-base text-[#A4A4A4]">
             <a 
@@ -177,8 +173,6 @@ const Settings = () => {
             >
               Support & Feedback
             </a>
-            {' - Email: '}
-            <span className="text-[#FF00A2]">colt.ables@gmail.com</span>
           </div>
         </div>
       </div>
