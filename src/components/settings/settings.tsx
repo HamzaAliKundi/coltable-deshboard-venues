@@ -36,11 +36,11 @@ const Settings = () => {
   const togglePasswordVisibility = () => setShowPassword(!showPassword)
 
   const handleEmailClick = (type: string) => {
-    const email = 'colt.ables@gmail.com'
-    const subjects = {
-      bug: 'Bug Report - ColTable Dashboard',
-      feature: 'Feature Request - ColTable Dashboard',
-      support: 'Support & Feedback - ColTable Dashboard'
+     const email = 'support@dragspace.com'
+     const subjects = {
+      bug: 'Bug Report',
+      feature: 'Feature Request',
+      support: 'Support & Feedback'
     }
     
     const subject = subjects[type as keyof typeof subjects]
