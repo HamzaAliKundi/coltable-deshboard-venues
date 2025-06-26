@@ -1004,7 +1004,8 @@ const CreateEvent = () => {
           <div className="flex flex-col gap-4">
             {/* Performers List */}
             <div>
-              <label className={labelClass}>Select Performer*</label>
+              <label className={labelClass}>Select Performers* (Also include the host/hostess name in the performer selection)
+              </label>
               <Controller
                 name="performersList"
                 control={control}
