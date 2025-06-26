@@ -9,6 +9,7 @@ import Select from "react-select";
 import CustomSelect from "../../utils/CustomSelect";
 import { Clock, Edit, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useGetAllPerformersQuery } from "../../apis/performer";
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -27,6 +28,7 @@ const Profile = () => {
   const [updateProfile, { isLoading: isUpdating }] =
     useUpdateVenueProfileMutation();
   const { data: profileData, isLoading } = useGetSingleVenueByIdQuery(venueId);
+  const { data: performersData } = useGetAllPerformersQuery("");
 
   const navigate = useNavigate();
 
@@ -121,7 +123,7 @@ const Profile = () => {
       const formData = {
         venueName: profileData.user.name,
         aboutVenue: profileData.user.description,
-        topPerformers: profileData.user.topDragPerformers,
+        topPerformers: profileData.user.topDragPerformers || [],
         location: profileData.user.location,
         openingTime: openingTime || "18:00",
         closingTime: closingTime || "03:00",
@@ -232,12 +234,100 @@ const Profile = () => {
           {/* Top Drag Performers */}
           <div>
             <label className={labelClass}>Top Drag Performers</label>
-            <input
-              type="text"
-              placeholder="Enter Top Drag Performers"
-              className={inputClass}
-              disabled={!isEditing}
-              {...register("topPerformers")}
+            <Controller
+              name="topPerformers"
+              control={control}
+              render={({ field }) => {
+                const selectedOptions =
+                  performersData
+                    ?.filter((performer: any) =>
+                      field.value?.includes(performer._id)
+                    )
+                    ?.map((performer: any) => ({
+                      value: performer._id,
+                      label: performer.fullDragName || "Unnamed Performer",
+                    })) || [];
+
+                return (
+                  <Select
+                    value={selectedOptions}
+                    onChange={(options) => {
+                      const selectedIds = options?.map((option) => option.value) || [];
+                      field.onChange(selectedIds);
+                    }}
+                    isMulti
+                    isDisabled={!isEditing}
+                    closeMenuOnSelect={false}
+                    options={performersData?.map((performer: any) => ({
+                      value: performer._id,
+                      label: performer.fullDragName || "Unnamed Performer",
+                    }))}
+                    className="w-full max-w-[782px]"
+                    styles={{
+                      control: (base) => ({
+                        ...base,
+                        minHeight: "46px",
+                        background: "#0D0D0D",
+                        border: "1px solid #383838",
+                        borderRadius: "16px",
+                        boxShadow: "none",
+                        "&:hover": {
+                          border: "1px solid #383838",  
+                        },
+                      }),
+                      menu: (base) => ({
+                        ...base,
+                        background: "#1D1D1D",
+                        border: "1px solid #383838",
+                        borderRadius: "4px",
+                      }),
+                      option: (base, state) => ({
+                        ...base,
+                        background: state.isFocused ? "#383838" : "#1D1D1D",
+                        color: "#fff",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        "&::before": {
+                          content: '""',
+                          display: "block",
+                          width: "16px",
+                          height: "16px",
+                          border: "2px solid #fff",
+                          borderRadius: "50%",
+                          backgroundColor: state.isSelected
+                            ? "#FF00A2"
+                            : "transparent",
+                        },
+                      }),
+                      multiValue: (base) => ({
+                        ...base,
+                        background: "#383838",
+                        borderRadius: "4px",
+                      }),
+                      multiValueLabel: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+                      multiValueRemove: (base) => ({
+                        ...base,
+                        color: "#fff",
+                        ":hover": {
+                          background: "#4a4a4a",
+                          borderRadius: "0 4px 4px 0",
+                        },
+                      }),
+                      input: (base) => ({
+                        ...base,
+                        color: "#fff",
+                      }),
+                    }}
+                    placeholder="Select Top Drag Performers"
+                    noOptionsMessage={() => "No performers available"}
+                  />
+                );
+              }}
             />
           </div>
 
