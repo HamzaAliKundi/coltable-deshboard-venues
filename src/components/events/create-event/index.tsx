@@ -1012,22 +1012,28 @@ const CreateEvent = () => {
                 defaultValue={[]}
                 rules={{ required: true }}
                 render={({ field }) => {
-                  const selectedOptions =
-                    performersData
-                      ?.filter((performer: any) =>
-                        field.value?.includes(performer._id)
-                      )
-                      ?.map((performer: any) => ({
+                  // Create a map of performer IDs to performer objects for quick lookup
+                  const performersMap = new Map(
+                    performersData?.map((performer: any) => [
+                      performer._id,
+                      {
                         value: performer._id,
                         label: performer.fullDragName || "Unnamed Performer",
-                      })) || [];
+                      }
+                    ]) || []
+                  );
+
+                  // Use the field.value order to maintain the original sequence
+                  const selectedOptions = (field.value || [])
+                    .map((performerId: string) => performersMap.get(performerId))
+                    .filter(Boolean);
 
                   return (
                     <Select
                       value={selectedOptions}
                       onChange={(options) => {
-                        const selectedIds =
-                          options?.map((option) => option.value) || [];
+                        // @ts-ignore
+                        const selectedIds = options?.map((option) => option.value) || [];
                         field.onChange(selectedIds);
                       }}
                       isMulti
