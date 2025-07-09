@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { useChangePasswordMutation } from '../../apis/profile'
+import React, { useState, useEffect } from 'react'
+import { useChangePasswordMutation, useGetPerformerProfileQuery, useUpdatePerformerProfileMutation } from '../../apis/profile'
 import toast from 'react-hot-toast'
 
 const Settings = () => {
@@ -7,7 +7,21 @@ const Settings = () => {
   const [showModal, setShowModal] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [passwordError, setPasswordError] = useState('')
+  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
+  const [isEditing, setIsEditing] = useState(false)
+  
   const [changePassword, { isLoading }] = useChangePasswordMutation()
+  const { data: profileData, isLoading: isLoadingProfile } = useGetPerformerProfileQuery({})
+  const [updateProfile, { isLoading: isUpdating }] = useUpdatePerformerProfileMutation()
+
+  // Load profile data when component mounts
+  useEffect(() => {
+    if (profileData?.user) {
+      setPhone(profileData.user.phone || '')
+      setEmail(profileData.user.email || '')
+    }
+  }, [profileData])
 
   const handleResetClick = () => {
     if (!newPassword) return
@@ -30,6 +44,22 @@ const Settings = () => {
       toast.success('Password changed successfully')
     } catch (error: any) {
       alert(error?.data?.message ?? 'Failed to change password')
+    }
+  }
+
+  const handleProfileUpdate = async () => {
+    try {
+      const updateData = {
+        phone: phone,
+        email: email
+      }
+      
+      await updateProfile({ data: updateData }).unwrap()
+      setIsEditing(false)
+      toast.success('Profile updated successfully!')
+    } catch (error: any) {
+      console.error('Failed to update profile:', error)
+      toast.error('Failed to update profile. Please try again.')
     }
   }
 
@@ -61,9 +91,80 @@ const Settings = () => {
     }, 1000)
   }
 
+  if (isLoadingProfile) {
+    return (
+      <div className="flex mt-16 justify-center min-h-screen max-w-[850px]">
+        <div className="w-8 h-8 border-4 border-[#FF00A2] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-8 mb-12">
+      {/* Profile Information Section */}
       <div className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="font-space-grotesk text-base text-white font-normal leading-none">Profile Information</h2>
+          <div 
+            className="flex items-center gap-2 text-white font-['Space_Grotesk'] text-[16px] leading-[100%] cursor-pointer"
+            onClick={() => setIsEditing(!isEditing)}
+          >
+            <img src="/profile/edit.svg" alt="Edit" className="w-4 h-4" />
+            {isEditing ? "cancel" : "edit"}
+          </div>
+        </div>
+        
+        <div className="mb-4 ml-8 mt-8">
+          <label className="block font-space-grotesk text-base text-[#A4A4A4] mb-2">
+            Phone Number
+          </label>
+          <input
+            type="tel"
+            placeholder="Enter phone number"
+            className="w-[210px] h-[40px] rounded-[35px] border border-white/20 bg-transparent text-white px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#FF00A2]"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="mb-4 ml-8">
+          <label className="block font-space-grotesk text-base text-[#A4A4A4] mb-2">
+            Email Address
+          </label>
+          <input
+            type="email"
+            placeholder="Enter email address"
+            className="w-[210px] h-[40px] rounded-[35px] border border-white/20 bg-transparent text-white px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#FF00A2]"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={!isEditing}
+          />
+        </div>
+
+        {isEditing && (
+          <div className="ml-8 mt-4">
+            <button
+              onClick={handleProfileUpdate}
+              disabled={isUpdating}
+              className={`bg-[#FF00A2] rounded-[35px] px-8 py-2 text-white flex items-center gap-2 ${
+                isUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+              }`}
+            >
+              {isUpdating ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Updating...</span>
+                </>
+              ) : (
+                'Update Profile'
+              )}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* <div className="mb-8">
         <h2 className="font-space-grotesk text-base text-white font-normal leading-none">Notifications & Alerts</h2>
         
         <div className="mb-4 ml-8 mt-8">
@@ -100,7 +201,7 @@ const Settings = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="mb-8">
         <h2 className="font-space-grotesk text-base text-white font-normal leading-none">Password Reset</h2>
