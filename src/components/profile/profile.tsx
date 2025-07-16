@@ -18,6 +18,8 @@ const Profile = () => {
   const { register, handleSubmit, control, reset } = useForm();
   const venueId = JSON.parse(localStorage.getItem("venueId") || '""');
   const [logoUploading, setLogoUploading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [hasRemovedLogo, setHasRemovedLogo] = useState(false);
 
   const venueOptions = [
     { value: "bar/club", label: "Bar/Club" },
@@ -52,6 +54,8 @@ const Profile = () => {
 
         try {
           setLogoUploading(true);
+          setIsUploading(true);
+          // First show preview
           const reader = new FileReader();
           reader.onload = () => {
             setLogoPreview(reader.result as string);
@@ -87,12 +91,14 @@ const Profile = () => {
 
           const data = await response.json();
           setLogoUrl(data.secure_url);
+          setHasRemovedLogo(false);
           toast.success("Logo uploaded successfully!");
         } catch (error) {
           console.error("Failed to upload logo:", error);
           toast.error("Failed to upload logo. Please try again.");
         } finally {
           setLogoUploading(false);
+          setIsUploading(false);
         }
       }
     };
@@ -103,6 +109,7 @@ const Profile = () => {
   const removeLogo = () => {
     setLogoUrl("");
     setLogoPreview("");
+    setHasRemovedLogo(true);
   };
 
   const generateSHA1 = async (message: string) => {
@@ -140,9 +147,26 @@ const Profile = () => {
         youtube: profileData.user.socialMediaLinks?.youtube || "",
       };
 
-      if (profileData.user.logo) {
-        setLogoUrl(profileData.user.logo);
-        setLogoPreview(profileData.user.logo);
+      console.log("Logo from API:", profileData.user.logo);
+      
+      const logo = profileData.user.logo;
+      const isDummyImage = logo && (
+        logo.includes("default") || 
+        logo.includes("placeholder") || 
+        logo.includes("dummy") ||
+        logo.includes("blank-profile-picture") ||
+        logo.includes("pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png")
+      );
+      
+      if (logo && logo.trim() !== "" && !isDummyImage) {
+        setLogoUrl(logo);
+        setLogoPreview(logo);
+        setHasRemovedLogo(false);
+      } else {
+        // No logo, empty string, or dummy image
+        setLogoUrl("");
+        setLogoPreview("");
+        setHasRemovedLogo(true);
       }
 
       reset(formData);
@@ -150,6 +174,25 @@ const Profile = () => {
   }, [profileData, reset]);
 
   const onSubmit = async (data: any) => {
+    console.log("Submitting form with logoUrl:", logoUrl);
+    console.log("logoPreview:", logoPreview);
+    console.log("hasRemovedLogo:", hasRemovedLogo);
+    
+    // Check if logo is required
+    const isValidLogo = logoUrl && 
+                       logoUrl.trim() !== "" && 
+                       !hasRemovedLogo && 
+                       !logoUrl.includes("default") && 
+                       !logoUrl.includes("placeholder") &&
+                       !logoUrl.includes("dummy") &&
+                       !logoUrl.includes("blank-profile-picture") &&
+                       !logoUrl.includes("pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png");
+    
+    if (!isValidLogo) {
+      toast.error("Venue logo is required");
+      return;
+    }
+    
     try {
       const transformedData = {
         name: data.venueName,
@@ -507,13 +550,13 @@ const Profile = () => {
           {/* Upload Logo */}
           <div className="w-full max-w-[782px] bg-black p-4">
             <h2 className="font-['Space_Grotesk'] text-white text-[20px] leading-[100%] mb-4">
-              Upload Logo
+              Venue Logo*
             </h2>
 
             <div
               className={`bg-[#0D0D0D] rounded-[16px] px-8 py-3 text-center ${
                 isEditing ? "cursor-pointer hover:bg-[#1A1A1A]" : ""
-              }`}
+              } ${(!logoUrl || hasRemovedLogo || (logoUrl && (logoUrl.includes("default") || logoUrl.includes("placeholder") || logoUrl.includes("dummy") || logoUrl.includes("blank-profile-picture") || logoUrl.includes("pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png")))) && isEditing ? "border-2 border-red-500" : ""}`}
               onClick={handleLogoUpload}
             >
               {logoPreview ? (
@@ -562,19 +605,19 @@ const Profile = () => {
             <div className="flex flex-row gap-3 justify-center mt-6 md:mt-8">
               <button
                 type="submit"
-                disabled={!isEditing || isUpdating || logoUploading}
+                disabled={!isEditing || isUpdating || isUploading || logoUploading}
                 className={`w-full py-2.5 px-6 bg-[#FF00A2] text-white rounded-xl font-semibold transition duration-200 ${
-                  (!isEditing || isUpdating || logoUploading) &&
+                  (!isEditing || isUpdating || isUploading || logoUploading) &&
                   "opacity-50 cursor-not-allowed"
                 }`}
               >
-                {isUpdating || logoUploading ? (
+                {isUpdating || isUploading || logoUploading ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     <span>
                       {isUpdating
                         ? "Publishing..."
-                        : logoUploading
+                        : isUploading || logoUploading
                         ? "Uploading logo..."
                         : "Uploading media..."}
                     </span>
