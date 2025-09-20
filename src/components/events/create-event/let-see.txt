@@ -238,14 +238,12 @@ const CreateEvent = () => {
       setLogoError("Flier is required");
       return;
     }
-    // Use the actual event start date instead of today's date for time fields
-    // This ensures proper sorting by combining the correct date with time
-    const eventDate = data.eventStartDate;
+    const today = new Date().toISOString().split("T")[0];
 
     const transformedData = {
-      startTime: new Date(`${eventDate}T${data.startTime}`),
-      endTime: new Date(`${eventDate}T${data.endTime}`),
-      eventCallTime: new Date(`${eventDate}T${data.callTime}`),
+      startTime: new Date(`${today}T${data.startTime}`),
+      endTime: new Date(`${today}T${data.endTime}`),
+      eventCallTime: new Date(`${today}T${data.callTime}`),
 
       type: data.eventType,
       title: data.eventName,
