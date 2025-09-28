@@ -253,7 +253,7 @@ const Profile = () => {
         >
           {/* Venue Name */}
           <div>
-            <label className={labelClass}>Venue Name?*</label>
+            <label className={labelClass}>Venue Name?***</label>
             <input
               type="text"
               placeholder="Enter Venue Name"
