@@ -9,21 +9,9 @@ const EventPreview = () => {
 
   // Helper function to handle timezone adjustments
   const getLocalDateSafe = (dateString: string) => {
+    // Use UTC methods to prevent timezone conversion
     const date = new Date(dateString);
-    if (
-      date.getUTCHours() === 0 &&
-      date.getUTCMinutes() === 0 &&
-      date.getUTCSeconds() === 0
-    ) {
-      const localDate = new Date(date);
-      const localDay = localDate.getDate();
-      const utcDay = date.getUTCDate();
-      if (localDay < utcDay) {
-        localDate.setDate(localDate.getDate() + 1);
-        return localDate;
-      }
-    }
-    return date;
+    return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
   };
 
   const formatDate = (dateString: string) => {
@@ -39,7 +27,8 @@ const EventPreview = () => {
   };
 
   const extractTime = (dateString: string) => {
-    const date = getLocalDateSafe(dateString);
+    // Simply extract the time components from startTime (ignore the date part)
+    const date = new Date(dateString);
     let hours = date.getHours();
     let minutes = date.getMinutes();
     const ampm = hours >= 12 ? "PM" : "AM";
