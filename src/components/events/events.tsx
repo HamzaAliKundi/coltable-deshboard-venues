@@ -35,21 +35,9 @@ const Events = () => {
 
   // Helper function to handle timezone adjustments
   const getLocalDateSafe = (dateString: string) => {
+    // Use UTC methods to prevent timezone conversion
     const date = new Date(dateString);
-    if (
-      date.getUTCHours() === 0 &&
-      date.getUTCMinutes() === 0 &&
-      date.getUTCSeconds() === 0
-    ) {
-      const localDate = new Date(date);
-      const localDay = localDate.getDate();
-      const utcDay = date.getUTCDate();
-      if (localDay < utcDay) {
-        localDate.setDate(localDate.getDate() + 1);
-        return localDate;
-      }
-    }
-    return date;
+    return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
   };
 
   const formatDate = (dateString: string) => {
@@ -65,7 +53,8 @@ const Events = () => {
   };
 
   const extractTime = (dateString: string) => {
-    const date = getLocalDateSafe(dateString);
+    // Simply extract the time components from startTime (ignore the date part)
+    const date = new Date(dateString);
     let hours = date.getHours();
     let minutes = date.getMinutes();
     const ampm = hours >= 12 ? "PM" : "AM";
@@ -118,7 +107,7 @@ const Events = () => {
               setCurrentPage(1);
             }}
           >
-            Pending Events
+            Pending Events.
             {activeTab === "pending" && (
               <div className="absolute bottom-0 left-0 w-full h-1 bg-[#FF00A2]"></div>
             )}
@@ -170,12 +159,17 @@ const Events = () => {
                   />
                   <div className="absolute top-3 left-3 w-[70px] h-[70px] bg-gradient-to-b from-[#FF00A2] to-[#D876B5] rounded-full flex flex-col items-center justify-center">
                     <span className="text-2xl font-bold text-[#e3d4de] leading-none">
-                      {formatDate(event.startDate)
-                        ?.replace(",", "")
-                        .slice(3, 6)}
+                      {(() => {
+                        const date = new Date(event.startDate);
+                        return date.getUTCDate();
+                      })()}
                     </span>
                     <span className="text-lg font-semibold text-[#ebd4e3] uppercase leading-none">
-                      {formatDate(event.startDate)?.slice(0, 3)}
+                      {(() => {
+                        const date = new Date(event.startDate);
+                        const utcDate = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+                        return utcDate.toLocaleDateString("en-US", { month: "short" }).slice(0, 3);
+                      })()}
                     </span>
                   </div>
                 </div>
