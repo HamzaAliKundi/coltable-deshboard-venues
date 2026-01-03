@@ -107,7 +107,7 @@ const Events = () => {
               setCurrentPage(1);
             }}
           >
-            Pending Events.
+            Pending Events
             {activeTab === "pending" && (
               <div className="absolute bottom-0 left-0 w-full h-1 bg-[#FF00A2]"></div>
             )}

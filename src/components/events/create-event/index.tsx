@@ -214,7 +214,7 @@ const CreateEvent = () => {
         performerNumbers: String(
           getEventsByVenuesById.event.assignedPerformers || ""
         ),
-        performersList: getEventsByVenuesById.event.performersList.map(
+        performersList: (getEventsByVenuesById.event.performersList || []).map(
           (p: any) => p._id
         ),
 
@@ -999,18 +999,17 @@ const CreateEvent = () => {
         <div>
           <div className="w-[100px] my-3 h-[4px] rounded-lg bg-[#FF00A2]"></div>
           <h1 className="text-white text-3xl font-space-grotesk mb-8">
-            Book Performer
+            Book Performer (optional)
           </h1>
           <div className="flex flex-col gap-4">
             {/* Performers List */}
             <div>
-              <label className={labelClass}>Select Performers* (Also include the host/hostess name in the performer selection)
+              <label className={labelClass}>Select Performers (optional)
               </label>
               <Controller
                 name="performersList"
                 control={control}
                 defaultValue={[]}
-                rules={{ required: true }}
                 render={({ field }) => {
                   // Create a map of performer IDs to performer objects for quick lookup
                   const performersMap = new Map(
