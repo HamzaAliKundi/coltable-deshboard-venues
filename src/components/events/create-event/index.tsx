@@ -238,21 +238,16 @@ const CreateEvent = () => {
       setLogoError("Flier is required");
       return;
     }
-
-    // Same approach as admin: send raw date/time strings + timezone; backend converts to UTC
-    const venueTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Karachi";
+    const today = new Date().toISOString().split("T")[0];
 
     const transformedData = {
-      // Raw date/time strings (YYYY-MM-DD, HH:mm) - backend will parse and store UTC
-      startDate: data.eventStartDate,
-      startTime: data.startTime,
-      endTime: data.endTime,
-      callTime: data.callTime,
-      venueTimezone,
+      startTime: new Date(`${today}T${data.startTime}`),
+      endTime: new Date(`${today}T${data.endTime}`),
+      eventCallTime: new Date(`${today}T${data.callTime}`),
 
       type: data.eventType,
       title: data.eventName,
-      host: data.eventHost.map((h) => h.label),
+      host: data.eventHost.map(h => h.label),
       specialRequirements: data.specialRequests,
       audienceType: data.audienceType,
       hosts: data.hostsCount,
@@ -262,6 +257,7 @@ const CreateEvent = () => {
       isEquipmentProvidedByPerformer: data.equipmentResponsibility,
       performers: data.performersCount,
       performersList: data.performersList,
+      startDate: new Date(data.eventStartDate).toISOString(),
       musicFormat: data.musicDeadline,
       assignedPerformers: data.performerNumbers,
       image: logoUrl,
